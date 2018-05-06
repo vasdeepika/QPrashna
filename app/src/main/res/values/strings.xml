@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">QPrashna</string>
+    <string name="user_name_hint_text">UserName</string>
+    <string name="password_hint_text">Password</string>
+    <string name="sign_in_with_facebook_button_text">Sign in with Facebook</string>
+    <string name="facebook_app_id">[APP_ID]</string>
+    <string name="fb_login_protocol_scheme">fb[APP_ID]</string>
+    <string name="or_text">or</string>
+    <string name="login_text">Login</string>
+    <string name="not_registered_signup_now">Not registered? Sign up Now!</string>
+    <string name="sign_up_text">Sign Up</string>
+    <string name="first_name_hint_text">FirstName</string>
+    <string name="last_name_hint_text">LastName</string>
+    <string name="email_address_hint_text">EmailAddress</string>
+    <string name="title_activity_sign_in_create_account">SignInCreateAccountActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="existing_user">Sign In</string>
+    <string name="new_user">Create Account</string>
+    <string name="registered_signin_now">Already registered? Sign In now!</string>
+    <string name="network_error">Network is not available.  Please check your network connection and try again...</string>
+    <string name="try_again_text">Something went wrong.  Please try again.</string>
+</resources>
