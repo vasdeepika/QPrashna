@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import java.util.Map;
 
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -26,9 +25,21 @@ public class ApiUtils {
 
     public static RequestBody getLoginRequestBody(String userName, String password) {
         Map<String, Object> jsonParams = new ArrayMap<>();
-        //put something inside the map, could be null
+
         jsonParams.put("userName", userName);
         jsonParams.put("password", password);
+
+        return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
+    }
+
+    public static RequestBody getCreateAccountRequestBody(String userName, String password, String firstName, String lastName, String emailAddress) {
+        Map<String, Object> jsonParams = new ArrayMap<>();
+
+        jsonParams.put("userName", userName);
+        jsonParams.put("password", password);
+        jsonParams.put("firstName",firstName);
+        jsonParams.put("lastName", lastName);
+        jsonParams.put("email", emailAddress);
 
         return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
     }

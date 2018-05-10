@@ -12,7 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.SignInCreateAccountActivity" android:configChanges="orientation|screenSize"
+        <activity
+            android:name=".ui.login.SignInCreateAccountActivity"
+            android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,9 +44,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.SignInActivity"
-            android:label="@string/title_activity_sign_in_create_account"
-            android:theme="@style/AppTheme"></activity>
+            android:name=".ui.feeds.FeedsActivity"
+            android:label="@string/title_activity_feeds"
+            android:theme="@style/AppTheme"
+            ></activity>
     </application>
 
 </manifest>

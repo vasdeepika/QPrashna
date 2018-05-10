@@ -1,4 +1,4 @@
-package com.android.qprashna.ui;
+package com.android.qprashna.ui.common;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;

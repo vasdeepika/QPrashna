@@ -17,6 +17,26 @@
     <string name="existing_user">Sign In</string>
     <string name="new_user">Create Account</string>
     <string name="registered_signin_now">Already registered? Sign In now!</string>
-    <string name="network_error">Network is not available.  Please check your network connection and try again...</string>
+    <string name="network_error">Network is not available.  Please check your network connection and try again…</string>
     <string name="try_again_text">Something went wrong.  Please try again.</string>
+    <string name="title_activity_feeds">FeedsActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="nav_feeds_text">Feeds</string>
+    <string name="nav_text_questions_answered_by_me">Questions Answered by Me</string>
+    <string name="nav_textquestions_unanswered_by_me">Questions Unanswered by Me</string>
+    <string name="nav_text_my_upvoted_questions">My Upvoted Questions</string>
+    <string name="nav_text_questions_asked_by_me">Questions Asked by Me</string>
+    <string name="nav_text_followers">Followers</string>
+    <string name="nav_text_following">Following</string>
+    <string name="nav_text_settings">Settings</string>
+    <string name="nav_text_edit_profile">Edit Profile</string>
+    <string name="nav_text_change_password">Change Password</string>
+    <string name="nav_text_sign_out">Sign Out</string>
+    <string name="search_for_person_text">Search for person…</string>
+    <string name="asked_by_text">Asked By %s to %s on</string>
+    <string name="up_voted">Upvoted</string>
+    <string name="up_vote">UpVote</string>
 </resources>

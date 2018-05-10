@@ -1,11 +1,11 @@
-package com.android.qprashna.ui;
+package com.android.qprashna.ui.login;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import static com.android.qprashna.ui.SignInOrCreateAccountFragment.USER_TYPE;
+import static com.android.qprashna.ui.login.SignInOrCreateAccountFragment.USER_TYPE;
 
 /**
  * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

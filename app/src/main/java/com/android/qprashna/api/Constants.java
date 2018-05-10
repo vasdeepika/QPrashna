@@ -1,5 +1,6 @@
 package com.android.qprashna.api;
 
 public interface Constants {
-    public String URL = "https://qprashna.com/rest/";
+    String URL = "https://qprashna.com/rest/";
+    String MY_PREFS_NAME = "QPrashnaPrefs";
 }

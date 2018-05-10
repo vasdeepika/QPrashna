@@ -1,4 +1,4 @@
-package com.android.qprashna.ui;
+package com.android.qprashna.ui.login;
 
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
 import com.android.qprashna.R;
+import com.android.qprashna.ui.login.SectionsPagerAdapter;
 
 public class SignInCreateAccountActivity extends AppCompatActivity {
 

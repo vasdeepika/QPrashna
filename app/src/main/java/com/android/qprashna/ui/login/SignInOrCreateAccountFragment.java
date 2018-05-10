@@ -1,10 +1,10 @@
-package com.android.qprashna.ui;
+package com.android.qprashna.ui.login;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewPager;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -24,14 +24,12 @@ import android.widget.Toast;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.LoginResponse;
+import com.android.qprashna.ui.common.TranslucentProgressBar;
+import com.android.qprashna.ui.feeds.FeedsActivity;
 
-import org.json.JSONObject;
+import org.parceler.Parcels;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,14 +39,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.HttpException;
 
 import static com.android.qprashna.api.ApiUtils.getApiService;
+import static com.android.qprashna.api.ApiUtils.getCreateAccountRequestBody;
 import static com.android.qprashna.api.ApiUtils.getErrorMessage;
 import static com.android.qprashna.api.ApiUtils.getLoginRequestBody;
-import static com.android.qprashna.ui.ViewUtilsClass.isThereInternetConnection;
+import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
 
 
 /**
@@ -83,6 +80,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
 
     public static final String USER_TYPE = "user_type";
     private Disposable mDisposable;
+    private LoginResponse mLoginResponse;
     public static final String TAG = SignInOrCreateAccountFragment.class.getName();
 
     @Override
@@ -105,7 +103,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
         }
         setNotRegisteredSpannableString();
         setLoginButtonOnClickListener();
-//        setRXJavaErrorHandling();
+        setRXJavaErrorHandling();
         return rootView;
     }
 
@@ -164,10 +162,73 @@ public class SignInOrCreateAccountFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 mProgressBar.showProgress(getContext());
-                loginCall(userNameEntry.getText().toString(), passwordEntry.getText().toString());
+                if(isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.sign_up_text))) {
+                    createAccountCall(userNameEntry.getText().toString(),
+                            passwordEntry.getText().toString(),
+                            firstNameLayout.getEditText().getText().toString(),
+                            lastNameLayout.getEditText().getText().toString(),
+                            emailAddressLayout.getEditText().getText().toString());
+                } else if (!isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.login_text))){
+                    loginCall(userNameEntry.getText().toString(), passwordEntry.getText().toString());
+                }
 
             }
         });
+    }
+
+    private void createAccountCall(String userName, String password, String firstName, String lastName, String emailAddress) {
+        if (getActivity() == null){
+            return;
+        }
+        if(isThereInternetConnection(getActivity())) {
+            Observable<LoginResponse> loginResponseObservable = getApiService().createAccount(getCreateAccountRequestBody(userName, password, firstName, lastName, emailAddress));
+            mDisposable = loginResponseObservable
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableObserver<LoginResponse>() {
+                        @Override
+                        public void onNext(LoginResponse loginResponse) {
+                            mProgressBar.unShowProgress();
+                            if (loginResponse != null) {
+                                mLoginResponse = loginResponse;
+                                launchFeedsActivity();
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            // show error message if api call throws an error
+                            mProgressBar.unShowProgress();
+                            if (e instanceof HttpException) {
+                                String errorResponse = null;
+                                try {
+                                    errorResponse = ((HttpException) e).response().errorBody().string();
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+                                Toast.makeText(getActivity(), getErrorMessage(errorResponse), Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getActivity(), R.string.try_again_text, Toast.LENGTH_LONG).show();
+                            }
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        }
+    }
+
+    private void launchFeedsActivity() {
+        Intent feedsActivityIntent =
+                new Intent(getContext(), FeedsActivity.class);
+        feedsActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(LoginResponse.KEY, Parcels.wrap(mLoginResponse));
+        feedsActivityIntent.putExtras(bundle);
+        startActivity(feedsActivityIntent);
+        getActivity().finish();
     }
 
     private void loginCall(String userName, String password) {
@@ -184,8 +245,8 @@ public class SignInOrCreateAccountFragment extends Fragment {
                         public void onNext(LoginResponse loginResponse) {
                             mProgressBar.unShowProgress();
                             if (loginResponse != null) {
-
-
+                                mLoginResponse = loginResponse;
+                                launchFeedsActivity();
                             }
                         }
 
