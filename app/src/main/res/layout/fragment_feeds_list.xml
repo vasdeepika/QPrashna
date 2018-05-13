@@ -6,7 +6,6 @@
     android:layout_marginBottom="30dp"
     android:fillViewport="true">
 
-
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,14 +21,21 @@
             <FrameLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp">
+                android:padding="5dp"
+                android:background="@color/colorPrimary">
 
                 <AutoCompleteTextView
                     android:id="@+id/search_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:hint="@string/search_for_person_text" />
+                    android:textColor="@color/colorWhite"
+                    android:textColorHint="@color/colorWhite"
+                    android:textStyle="bold"
+                    android:textCursorDrawable="@drawable/white_cursor"
+                    android:hint="@string/search_for_person_text"
+                    android:theme="@style/Autocomplete"
+                    android:inputType="textPersonName"/>
 
                 <Button
                     android:id="@+id/clear_search_icon"
@@ -38,7 +44,7 @@
                     android:layout_gravity="end|bottom"
                     android:layout_marginBottom="10dp"
                     android:layout_marginEnd="10dp"
-                    android:background="@drawable/ic_close_black_24dp"
+                    android:background="@drawable/ic_close_white_24dp"
                     android:onClick="clearSearchText"
                     android:visibility="gone" />
 
@@ -63,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            tools:listitem="@layout/fragment_feed"
+            tools:listitem="@layout/feed_item"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

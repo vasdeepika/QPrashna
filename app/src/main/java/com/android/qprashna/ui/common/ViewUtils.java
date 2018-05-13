@@ -6,11 +6,15 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.qprashna.R;
-import com.android.qprashna.ui.common.TranslucentProgressBar;
+
+import java.io.IOException;
+
+import retrofit2.HttpException;
+
+import static com.android.qprashna.api.ApiUtils.getErrorMessage;
 
 public class ViewUtils {
 
@@ -37,6 +41,20 @@ public class ViewUtils {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+        }
+    }
+
+    public static void showErrorMessage(Context context,Throwable e) {
+        if (e instanceof HttpException) {
+            String errorResponse = null;
+            try {
+                errorResponse = ((HttpException) e).response().errorBody().string();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            Toast.makeText(context, getErrorMessage(errorResponse), Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(context, R.string.try_again_text, Toast.LENGTH_LONG).show();
         }
     }
 }

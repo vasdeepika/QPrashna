@@ -3,106 +3,89 @@ package com.android.qprashna.api;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import org.parceler.Parcel;
-
-@Parcel
-public class LoginResponse {
-
-    public static final String KEY = "login";
+public class UserResult {
 
     @SerializedName("id")
     @Expose
-    protected Integer id;
+    private Integer id;
     @SerializedName("userName")
     @Expose
-    protected String userName;
+    private String userName;
     @SerializedName("status")
     @Expose
-    protected String status;
+    private String status;
     @SerializedName("firstName")
     @Expose
-    protected String firstName;
-    @SerializedName("middleName")
-    @Expose
-    protected String middleName;
+    private String firstName;
     @SerializedName("lastName")
     @Expose
-    protected String lastName;
+    private String lastName;
     @SerializedName("email")
     @Expose
-    protected String email;
-    @SerializedName("gender")
-    @Expose
-    protected String gender;
-    @SerializedName("dateOfBirth")
-    @Expose
-    protected long dateOfBirth;
-    @SerializedName("googleID")
-    @Expose
-    protected String googleID;
-    @SerializedName("twitterID")
-    @Expose
-    protected String twitterID;
+    private String email;
     @SerializedName("country")
     @Expose
-    protected String country;
+    private String country;
     @SerializedName("state")
     @Expose
-    protected String state;
+    private String state;
     @SerializedName("city")
     @Expose
-    protected String city;
+    private String city;
     @SerializedName("zip")
     @Expose
-    protected String zip;
-    @SerializedName("designation")
+    private String zip;
+    @SerializedName("lastFeedAccessTime")
     @Expose
-    protected String designation;
+    private long lastFeedAccessTime;
     @SerializedName("createdBy")
     @Expose
-    protected String createdBy;
+    private String createdBy;
     @SerializedName("createdDate")
     @Expose
-    protected long createdDate;
+    private long createdDate;
     @SerializedName("updatedBy")
     @Expose
-    protected String updatedBy;
+    private String updatedBy;
     @SerializedName("updatedDate")
     @Expose
-    protected long updatedDate;
+    private long updatedDate;
     @SerializedName("profilePicURL")
     @Expose
-    protected String profilePicURL;
+    private String profilePicURL;
     @SerializedName("hash")
     @Expose
-    protected String hash;
+    private String hash;
+    @SerializedName("facebookFollowersCount")
+    @Expose
+    private Integer facebookFollowersCount;
     @SerializedName("ipAddress")
     @Expose
-    protected String ipAddress;
-    @SerializedName("internalUser")
+    private String ipAddress;
+    @SerializedName("upvoteThresholdCount")
     @Expose
-    protected Boolean internalUser;
-    @SerializedName("twitterVerified")
-    @Expose
-    protected Boolean twitterVerified;
+    private Integer upvoteThresholdCount;
     @SerializedName("trendValue")
     @Expose
-    protected Integer trendValue;
+    private Integer trendValue;
     @SerializedName("twitterFollowersCount")
     @Expose
-    protected Integer twitterFollowersCount;
+    private Integer twitterFollowersCount;
     @SerializedName("resetPasswordState")
     @Expose
-    protected Integer resetPasswordState;
+    private Integer resetPasswordState;
+    @SerializedName("passwordExpirydate")
+    @Expose
+    private long passwordExpirydate;
     @SerializedName("proxy")
     @Expose
-    protected Boolean proxy;
+    private Boolean proxy;
     @SerializedName("superUser")
     @Expose
-    protected Boolean superUser;
+    private Boolean superUser;
     @SerializedName("username")
     @Expose
-    protected String username;
+    private String username;
 
     public Integer getId() {
         return id;
@@ -136,14 +119,6 @@ public class LoginResponse {
         this.firstName = firstName;
     }
 
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
     public String getLastName() {
         return lastName;
     }
@@ -158,38 +133,6 @@ public class LoginResponse {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public long getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(Integer dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public String getGoogleID() {
-        return googleID;
-    }
-
-    public void setGoogleID(String googleID) {
-        this.googleID = googleID;
-    }
-
-    public String getTwitterID() {
-        return twitterID;
-    }
-
-    public void setTwitterID(String twitterID) {
-        this.twitterID = twitterID;
     }
 
     public String getCountry() {
@@ -224,12 +167,12 @@ public class LoginResponse {
         this.zip = zip;
     }
 
-    public String getDesignation() {
-        return designation;
+    public long getLastFeedAccessTime() {
+        return lastFeedAccessTime;
     }
 
-    public void setDesignation(String designation) {
-        this.designation = designation;
+    public void setLastFeedAccessTime(long lastFeedAccessTime) {
+        this.lastFeedAccessTime = lastFeedAccessTime;
     }
 
     public String getCreatedBy() {
@@ -244,7 +187,7 @@ public class LoginResponse {
         return createdDate;
     }
 
-    public void setCreatedDate(Integer createdDate) {
+    public void setCreatedDate(long createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -260,7 +203,7 @@ public class LoginResponse {
         return updatedDate;
     }
 
-    public void setUpdatedDate(Integer updatedDate) {
+    public void setUpdatedDate(long updatedDate) {
         this.updatedDate = updatedDate;
     }
 
@@ -280,6 +223,14 @@ public class LoginResponse {
         this.hash = hash;
     }
 
+    public Integer getFacebookFollowersCount() {
+        return facebookFollowersCount;
+    }
+
+    public void setFacebookFollowersCount(Integer facebookFollowersCount) {
+        this.facebookFollowersCount = facebookFollowersCount;
+    }
+
     public String getIpAddress() {
         return ipAddress;
     }
@@ -288,20 +239,12 @@ public class LoginResponse {
         this.ipAddress = ipAddress;
     }
 
-    public Boolean getInternalUser() {
-        return internalUser;
+    public Integer getUpvoteThresholdCount() {
+        return upvoteThresholdCount;
     }
 
-    public void setInternalUser(Boolean internalUser) {
-        this.internalUser = internalUser;
-    }
-
-    public Boolean getTwitterVerified() {
-        return twitterVerified;
-    }
-
-    public void setTwitterVerified(Boolean twitterVerified) {
-        this.twitterVerified = twitterVerified;
+    public void setUpvoteThresholdCount(Integer upvoteThresholdCount) {
+        this.upvoteThresholdCount = upvoteThresholdCount;
     }
 
     public Integer getTrendValue() {
@@ -326,6 +269,14 @@ public class LoginResponse {
 
     public void setResetPasswordState(Integer resetPasswordState) {
         this.resetPasswordState = resetPasswordState;
+    }
+
+    public long getPasswordExpirydate() {
+        return passwordExpirydate;
+    }
+
+    public void setPasswordExpirydate(Integer passwordExpirydate) {
+        this.passwordExpirydate = passwordExpirydate;
     }
 
     public Boolean getProxy() {

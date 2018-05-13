@@ -12,16 +12,19 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.FeedsResponse;
+import com.android.qprashna.api.UserResult;
+import com.android.qprashna.api.UsersResponse;
 import com.android.qprashna.ui.feeds.dummy.DummyContent.DummyItem;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,11 +33,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.HttpException;
 
 import static com.android.qprashna.api.ApiUtils.getApiService;
-import static com.android.qprashna.api.ApiUtils.getErrorMessage;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
+import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
 
 public class FeedsFragment extends Fragment {
@@ -64,6 +66,9 @@ public class FeedsFragment extends Fragment {
     private FeedsResponse mfeedsResponse;
     private FeedsRecyclerViewAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
+    private UsersResponse mUsersResponse;
+    ArrayList<String> mUsersAdapterList;
+    private ArrayAdapter<String> mUsersAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -93,11 +98,18 @@ public class FeedsFragment extends Fragment {
 
     private void setUpSearchAutoComplete() {
 //        hideSoftKeyboard(mSearchText, getActivity());
+
         mSearchText.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void afterTextChanged(Editable s) {
                 //do nothing
+
+                loadUsers(s.toString());
+
+                mSearchText.setThreshold(2);
+                mSearchText.setAdapter(mUsersAdapter);
+                mSearchText.showDropDown();
             }
 
             @Override
@@ -112,8 +124,46 @@ public class FeedsFragment extends Fragment {
                 } else {
                     mClearSearch.setVisibility(View.GONE);
                 }
+                if (mSearchText.enoughToFilter()) {
+                    mSearchText.showDropDown();
+                    mSearchText.bringToFront();
+                }
             }
         });
+
+    }
+
+    private void loadUsers(String s) {
+        if (getActivity() == null) {
+            return;
+        }
+        if (isThereInternetConnection(getActivity())) {
+            Observable<UsersResponse> feedsResponseObservable = getApiService().getUsers(s);
+            mDisposable = feedsResponseObservable
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableObserver<UsersResponse>() {
+                        @Override
+                        public void onNext(UsersResponse usersResponse) {
+                            if (usersResponse != null) {
+                                for (UserResult user : usersResponse.getUserResult()) {
+                                    mUsersAdapterList.add(user.getFirstName()+user.getLastName());
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            // show error message if api call throws an error
+                            showErrorMessage(getActivity(),e);
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        }
     }
 
     public void clearSearchText(View v) {
@@ -144,7 +194,11 @@ public class FeedsFragment extends Fragment {
         int columns = Math.round(dpWidth / 300);
         mLayoutManager = new GridLayoutManager(getActivity(), columns);
         mFeedsRecyclerView.setLayoutManager(mLayoutManager);
-        mFeedsRecyclerView.setNestedScrollingEnabled(false);
+
+        mSearchText.setThreshold(1);
+        mUsersAdapterList = new ArrayList<>();
+        mUsersAdapter = new ArrayAdapter<>
+                (getActivity(), android.R.layout.select_dialog_item, mUsersAdapterList);
 
         setUpSearchAutoComplete();
         if (savedInstanceState == null) {
@@ -170,7 +224,7 @@ public class FeedsFragment extends Fragment {
             return;
         }
         if (isThereInternetConnection(getActivity())) {
-            Observable<FeedsResponse> feedsResponseObservable = getApiService().getFeeds();
+            Observable<FeedsResponse> feedsResponseObservable = getApiService().getFeeds(mCustomerId);
             mDisposable = feedsResponseObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -180,7 +234,7 @@ public class FeedsFragment extends Fragment {
                             showLoadingBar(false);
                             if (feedsResponse != null) {
                                 mfeedsResponse = feedsResponse;
-                                mAdapter.setFeeds(mfeedsResponse.getItems());
+                                mAdapter.setFeeds(mfeedsResponse.getItems(), mCustomerId);
                                 mFeedsRecyclerView.setVisibility(View.VISIBLE);                            }
                         }
 
@@ -188,17 +242,7 @@ public class FeedsFragment extends Fragment {
                         public void onError(Throwable e) {
                             // show error message if api call throws an error
                             showLoadingBar(false);
-                            if (e instanceof HttpException) {
-                                String errorResponse = null;
-                                try {
-                                    errorResponse = ((HttpException) e).response().errorBody().string();
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-                                Toast.makeText(getActivity(), getErrorMessage(errorResponse), Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getActivity(), R.string.try_again_text, Toast.LENGTH_LONG).show();
-                            }
+                            showErrorMessage(getActivity(), e);
                         }
 
                         @Override

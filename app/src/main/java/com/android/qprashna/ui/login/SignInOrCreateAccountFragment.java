@@ -46,6 +46,7 @@ import static com.android.qprashna.api.ApiUtils.getCreateAccountRequestBody;
 import static com.android.qprashna.api.ApiUtils.getErrorMessage;
 import static com.android.qprashna.api.ApiUtils.getLoginRequestBody;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
+import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
 
 /**
@@ -110,15 +111,17 @@ public class SignInOrCreateAccountFragment extends Fragment {
     private void setRXJavaErrorHandling() {
         // RXJava 2 error handling
         RxJavaPlugins.setErrorHandler(e -> {
-            getActivity().runOnUiThread(() -> {
-                mProgressBar.unShowProgress();
-                Toast.makeText(getActivity(), R.string.try_again_text, Toast.LENGTH_LONG).show();
-            });
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    mProgressBar.unShowProgress();
+                    Toast.makeText(getActivity(), R.string.try_again_text, Toast.LENGTH_LONG).show();
+                });
 
-            Log.w(TAG, "Exception Occurred: " + e.getMessage());
+                Log.w(TAG, "Exception Occurred: " + e.getMessage());
 
-            if (mDisposable != null) {
-                mDisposable.dispose();
+                if (mDisposable != null) {
+                    mDisposable.dispose();
+                }
             }
         });
     }
@@ -199,17 +202,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
                         public void onError(Throwable e) {
                             // show error message if api call throws an error
                             mProgressBar.unShowProgress();
-                            if (e instanceof HttpException) {
-                                String errorResponse = null;
-                                try {
-                                    errorResponse = ((HttpException) e).response().errorBody().string();
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-                                Toast.makeText(getActivity(), getErrorMessage(errorResponse), Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getActivity(), R.string.try_again_text, Toast.LENGTH_LONG).show();
-                            }
+                            showErrorMessage(getActivity(), e);
                         }
 
                         @Override

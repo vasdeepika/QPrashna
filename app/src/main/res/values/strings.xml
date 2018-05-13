@@ -39,4 +39,5 @@
     <string name="asked_by_text">Asked By %s to %s on</string>
     <string name="up_voted">Upvoted</string>
     <string name="up_vote">UpVote</string>
+    <string name="up_votes">%s UpVotes</string>
 </resources>
