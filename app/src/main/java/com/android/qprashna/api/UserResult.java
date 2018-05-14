@@ -3,89 +3,94 @@ package com.android.qprashna.api;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.parceler.Parcel;
+
+@Parcel
 public class UserResult {
 
     @SerializedName("id")
     @Expose
-    private Integer id;
+    protected Integer id;
     @SerializedName("userName")
     @Expose
-    private String userName;
+    protected String userName;
     @SerializedName("status")
     @Expose
-    private String status;
+    protected String status;
     @SerializedName("firstName")
     @Expose
-    private String firstName;
+    protected String firstName;
     @SerializedName("lastName")
     @Expose
-    private String lastName;
+    protected String lastName;
     @SerializedName("email")
     @Expose
-    private String email;
+    protected String email;
     @SerializedName("country")
     @Expose
-    private String country;
+    protected String country;
     @SerializedName("state")
     @Expose
-    private String state;
+    protected String state;
     @SerializedName("city")
     @Expose
-    private String city;
+    protected String city;
     @SerializedName("zip")
     @Expose
-    private String zip;
+    protected String zip;
     @SerializedName("lastFeedAccessTime")
     @Expose
-    private long lastFeedAccessTime;
+    protected long lastFeedAccessTime;
     @SerializedName("createdBy")
     @Expose
-    private String createdBy;
+    protected String createdBy;
     @SerializedName("createdDate")
     @Expose
-    private long createdDate;
+    protected long createdDate;
     @SerializedName("updatedBy")
     @Expose
-    private String updatedBy;
+    protected String updatedBy;
     @SerializedName("updatedDate")
     @Expose
-    private long updatedDate;
+    protected long updatedDate;
     @SerializedName("profilePicURL")
     @Expose
-    private String profilePicURL;
+    protected String profilePicURL;
     @SerializedName("hash")
     @Expose
-    private String hash;
+    protected String hash;
     @SerializedName("facebookFollowersCount")
     @Expose
-    private Integer facebookFollowersCount;
+    protected Integer facebookFollowersCount;
     @SerializedName("ipAddress")
     @Expose
-    private String ipAddress;
+    protected String ipAddress;
     @SerializedName("upvoteThresholdCount")
     @Expose
-    private Integer upvoteThresholdCount;
+    protected Integer upvoteThresholdCount;
     @SerializedName("trendValue")
     @Expose
-    private Integer trendValue;
+    protected Integer trendValue;
     @SerializedName("twitterFollowersCount")
     @Expose
-    private Integer twitterFollowersCount;
+    protected Integer twitterFollowersCount;
     @SerializedName("resetPasswordState")
     @Expose
-    private Integer resetPasswordState;
+    protected Integer resetPasswordState;
     @SerializedName("passwordExpirydate")
     @Expose
-    private long passwordExpirydate;
+    protected long passwordExpirydate;
     @SerializedName("proxy")
     @Expose
-    private Boolean proxy;
+    protected Boolean proxy;
     @SerializedName("superUser")
     @Expose
-    private Boolean superUser;
+    protected Boolean superUser;
     @SerializedName("username")
     @Expose
-    private String username;
+    protected String username;
+
+    public static final String PROFILE = "profile";
 
     public Integer getId() {
         return id;

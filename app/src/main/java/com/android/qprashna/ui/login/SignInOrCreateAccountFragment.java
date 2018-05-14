@@ -29,8 +29,6 @@ import com.android.qprashna.ui.feeds.FeedsActivity;
 
 import org.parceler.Parcels;
 
-import java.io.IOException;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
@@ -39,14 +37,15 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.HttpException;
+import retrofit2.Response;
 
 import static com.android.qprashna.api.ApiUtils.getApiService;
 import static com.android.qprashna.api.ApiUtils.getCreateAccountRequestBody;
-import static com.android.qprashna.api.ApiUtils.getErrorMessage;
 import static com.android.qprashna.api.ApiUtils.getLoginRequestBody;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
+import static com.android.qprashna.ui.common.ViewUtils.saveUserIdInSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
+import static com.android.qprashna.ui.common.ViewUtils.storeJSessionIdInSharedPreferences;
 
 
 /**
@@ -161,21 +160,18 @@ public class SignInOrCreateAccountFragment extends Fragment {
     }
 
     private void setLoginButtonOnClickListener() {
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mProgressBar.showProgress(getContext());
-                if(isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.sign_up_text))) {
-                    createAccountCall(userNameEntry.getText().toString(),
-                            passwordEntry.getText().toString(),
-                            firstNameLayout.getEditText().getText().toString(),
-                            lastNameLayout.getEditText().getText().toString(),
-                            emailAddressLayout.getEditText().getText().toString());
-                } else if (!isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.login_text))){
-                    loginCall(userNameEntry.getText().toString(), passwordEntry.getText().toString());
-                }
-
+        loginButton.setOnClickListener(view -> {
+            mProgressBar.showProgress(getContext());
+            if(isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.sign_up_text))) {
+                createAccountCall(userNameEntry.getText().toString(),
+                        passwordEntry.getText().toString(),
+                        firstNameLayout.getEditText().getText().toString(),
+                        lastNameLayout.getEditText().getText().toString(),
+                        emailAddressLayout.getEditText().getText().toString());
+            } else if (!isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.login_text))){
+                loginCall(userNameEntry.getText().toString(), passwordEntry.getText().toString());
             }
+
         });
     }
 
@@ -184,16 +180,19 @@ public class SignInOrCreateAccountFragment extends Fragment {
             return;
         }
         if(isThereInternetConnection(getActivity())) {
-            Observable<LoginResponse> loginResponseObservable = getApiService().createAccount(getCreateAccountRequestBody(userName, password, firstName, lastName, emailAddress));
+            Observable<Response<LoginResponse>> loginResponseObservable = getApiService().createAccount(getCreateAccountRequestBody(userName, password, firstName, lastName, emailAddress));
             mDisposable = loginResponseObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(new DisposableObserver<LoginResponse>() {
+                    .subscribeWith(new DisposableObserver<Response<LoginResponse>>() {
                         @Override
-                        public void onNext(LoginResponse loginResponse) {
+                        public void onNext(Response<LoginResponse> loginResponse) {
+                            String jSessionId = loginResponse.headers().get("Set-Cookie").split(";",2)[0];
+                            storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
                             mProgressBar.unShowProgress();
-                            if (loginResponse != null) {
-                                mLoginResponse = loginResponse;
+                            if (loginResponse.body() != null) {
+                                mLoginResponse =  loginResponse.body();
+                                saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
                                 launchFeedsActivity();
                             }
                         }
@@ -229,16 +228,30 @@ public class SignInOrCreateAccountFragment extends Fragment {
            return;
         }
         if(isThereInternetConnection(getActivity())) {
-            Observable<LoginResponse> loginResponseObservable = getApiService().login(getLoginRequestBody(userName, password));
+            Observable<Response<LoginResponse>> loginResponseObservable = getApiService().login(getLoginRequestBody(userName, password));
             mDisposable = loginResponseObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(new DisposableObserver<LoginResponse>() {
+                    .subscribeWith(new DisposableObserver<Response<LoginResponse>>() {
+
                         @Override
-                        public void onNext(LoginResponse loginResponse) {
+                        public void onNext(Response<LoginResponse> loginResponseResponse) {
+                            String jSessionId = loginResponseResponse.headers().get("Set-Cookie").split(";",2)[0];
+                            storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
+//                            for (int i=0; i < headers.length; i++)
+//                            {
+//                                Header h = headers[i];
+//                                String s1 = h.getName();
+//                                if(s1.equals("Set-Cookie"))
+//                                {
+//                                    sessionCookieValue = h.getValue().split(";",2)[0];
+//                                    return;
+//                                }
+//                            }
                             mProgressBar.unShowProgress();
-                            if (loginResponse != null) {
-                                mLoginResponse = loginResponse;
+                            if (loginResponseResponse.body() != null) {
+                                mLoginResponse = loginResponseResponse.body();
+                                saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
                                 launchFeedsActivity();
                             }
                         }
@@ -247,17 +260,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
                         public void onError(Throwable e) {
                             // show error message if api call throws an error
                             mProgressBar.unShowProgress();
-                            if (e instanceof HttpException) {
-                                String errorResponse = null;
-                                try {
-                                    errorResponse = ((HttpException) e).response().errorBody().string();
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-                                Toast.makeText(getActivity(), getErrorMessage(errorResponse), Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getActivity(), R.string.try_again_text, Toast.LENGTH_LONG).show();
-                            }
+                            showErrorMessage(getActivity(),e);
                         }
 
                         @Override

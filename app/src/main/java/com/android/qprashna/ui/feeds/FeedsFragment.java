@@ -1,6 +1,7 @@
 package com.android.qprashna.ui.feeds;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -22,9 +23,13 @@ import com.android.qprashna.R;
 import com.android.qprashna.api.FeedsResponse;
 import com.android.qprashna.api.UserResult;
 import com.android.qprashna.api.UsersResponse;
+import com.android.qprashna.ui.ProfileViewActivity;
 import com.android.qprashna.ui.feeds.dummy.DummyContent.DummyItem;
 
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -52,9 +57,6 @@ public class FeedsFragment extends Fragment {
 
     @BindView(R.id.feeds_list)
     RecyclerView mFeedsRecyclerView;
-//
-//    @BindView(R.id.input_layout_email)
-//    TextInputLayout emailAddressLayout;
 
     private int mCustomerId;
     private String mFeedType;
@@ -66,7 +68,7 @@ public class FeedsFragment extends Fragment {
     private FeedsResponse mfeedsResponse;
     private FeedsRecyclerViewAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
-    private UsersResponse mUsersResponse;
+    private List<UserResult> mUsersResults;
     ArrayList<String> mUsersAdapterList;
     private ArrayAdapter<String> mUsersAdapter;
 
@@ -77,14 +79,13 @@ public class FeedsFragment extends Fragment {
     public FeedsFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static FeedsFragment newInstance(int columnCount) {
-        FeedsFragment fragment = new FeedsFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+//    @SuppressWarnings("unused")
+//    public static FeedsFragment newInstance(int columnCount) {
+//        FeedsFragment fragment = new FeedsFragment();
+//        Bundle args = new Bundle();
+//        fragment.setArguments(args);
+//        return fragment;
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,43 +95,43 @@ public class FeedsFragment extends Fragment {
             mCustomerId = getArguments().getInt(FeedsFragment.CUSTOMER_ID);
             mFeedType = getArguments().getString(FeedsFragment.FEED_TYPE, FeedTypes.GENERAL.toString());
         }
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(UsersResponse.KEY)) {
+            mUsersResults = Parcels.unwrap(savedInstanceState.getParcelable(UsersResponse.KEY));
+        }
     }
 
     private void setUpSearchAutoComplete() {
 //        hideSoftKeyboard(mSearchText, getActivity());
 
+        mSearchText.setThreshold(2);
+        mSearchText.setAdapter(mUsersAdapter);
+
         mSearchText.addTextChangedListener(new TextWatcher() {
 
             @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(mSearchText.getText().toString().isEmpty()) {
+                    mClearSearch.setVisibility(View.INVISIBLE);
+                } else {
+                    mClearSearch.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
             public void afterTextChanged(Editable s) {
-                //do nothing
-
-                loadUsers(s.toString());
-
-                mSearchText.setThreshold(2);
-                mSearchText.setAdapter(mUsersAdapter);
-                mSearchText.showDropDown();
+                if(mSearchText.getText().length() >= mSearchText.getThreshold()) {
+                    loadUsers(s.toString());
+                }
             }
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 //do nothing
             }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.length() != 0) {
-                    mClearSearch.setVisibility(View.VISIBLE);
-                } else {
-                    mClearSearch.setVisibility(View.GONE);
-                }
-                if (mSearchText.enoughToFilter()) {
-                    mSearchText.showDropDown();
-                    mSearchText.bringToFront();
-                }
-            }
         });
 
+        launchSelectedUsersScreen();
     }
 
     private void loadUsers(String s) {
@@ -146,16 +147,23 @@ public class FeedsFragment extends Fragment {
                         @Override
                         public void onNext(UsersResponse usersResponse) {
                             if (usersResponse != null) {
+                                mUsersResults = usersResponse.getUserResult();
+                                mUsersAdapterList.clear();
+                                mUsersAdapter.clear();
                                 for (UserResult user : usersResponse.getUserResult()) {
-                                    mUsersAdapterList.add(user.getFirstName()+user.getLastName());
+                                    mUsersAdapterList.add(user.getFirstName()+" "+user.getLastName());
                                 }
+                                mUsersAdapter.addAll(mUsersAdapterList);
+                                mUsersAdapter.notifyDataSetChanged();
+                                mSearchText.showDropDown();
                             }
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            // show error message if api call throws an error
-                            showErrorMessage(getActivity(),e);
+                            mUsersAdapterList.clear();
+                            mUsersAdapter.clear();
+                            mUsersAdapter.notifyDataSetChanged();
                         }
 
                         @Override
@@ -164,6 +172,29 @@ public class FeedsFragment extends Fragment {
                         }
                     });
         }
+    }
+
+    private void launchSelectedUsersScreen() {
+        mSearchText.setOnItemClickListener((parent, view, position, id) -> {
+            if(mUsersResults.size() != 0 ) {
+                mSearchText.setText("");
+                mUsersAdapterList.clear();
+                mUsersAdapter.clear();
+                mUsersAdapter.notifyDataSetChanged();
+
+                Intent profileViewActivityIntent =
+                        new Intent(getContext(), ProfileViewActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(UserResult.PROFILE, Parcels.wrap(mUsersResults.get(position)));
+                profileViewActivityIntent.putExtras(bundle);
+                startActivity(profileViewActivityIntent);
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     public void clearSearchText(View v) {
@@ -199,6 +230,7 @@ public class FeedsFragment extends Fragment {
         mUsersAdapterList = new ArrayList<>();
         mUsersAdapter = new ArrayAdapter<>
                 (getActivity(), android.R.layout.select_dialog_item, mUsersAdapterList);
+        mUsersAdapter.setNotifyOnChange(true);
 
         setUpSearchAutoComplete();
         if (savedInstanceState == null) {
@@ -294,5 +326,13 @@ public class FeedsFragment extends Fragment {
         if (mDisposable != null) {
             mDisposable.dispose();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save outState
+        outState.putParcelable(UsersResponse.KEY, Parcels.wrap(mUsersResults));
     }
 }

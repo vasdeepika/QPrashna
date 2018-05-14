@@ -14,6 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiUtils {
 
     public static QPrashnaApis getApiService() {
+
         Retrofit retrofit = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
@@ -28,6 +29,15 @@ public class ApiUtils {
 
         jsonParams.put("userName", userName);
         jsonParams.put("password", password);
+
+        return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
+    }
+
+    public static RequestBody isFollowingRequestBody(int userId, int profileIdToBeView) {
+        Map<String, Object> jsonParams = new ArrayMap<>();
+
+        jsonParams.put("userId", userId);
+        jsonParams.put("profileIdToBeView", profileIdToBeView);
 
         return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
     }

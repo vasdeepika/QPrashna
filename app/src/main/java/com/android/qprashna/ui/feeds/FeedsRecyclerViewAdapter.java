@@ -8,14 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.Item;
 import com.android.qprashna.ui.feeds.FeedsFragment.OnListFragmentInteractionListener;
 import com.android.qprashna.ui.feeds.dummy.DummyContent.DummyItem;
 
-import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
@@ -25,10 +23,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.HttpException;
 
 import static com.android.qprashna.api.ApiUtils.getApiService;
-import static com.android.qprashna.api.ApiUtils.getErrorMessage;
+import static com.android.qprashna.ui.common.ViewUtils.getJSessionIdInSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
 import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
@@ -83,35 +80,33 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
         holder.upVote.setOnClickListener(v -> {
             int count = getUpvoteCount(holder.upVoteCount.getText().toString());
             if(holder.upVote.getText().equals(mContext.getResources().getString(R.string.up_voted))) {
-                int newCount = updateUpVoteCount("unupvote", feedItem.getFeedQuestionId(), feedItem.getFeedId(), count);
-                if(count!=newCount && count>newCount) {
-                    holder.upVoteCount.setText(getUpVoteCountText(newCount));
-                    holder.upVote.setText(R.string.up_vote);
-                    holder.upVote.setBackgroundColor(mContext.getResources().getColor(R.color.colorPrimary));
-                }
+                updateUpVoteCount("unupvote", feedItem.getFeedQuestionId(), feedItem.getFeedId(), count, holder.upVoteCount, holder.upVote);
             } else if (holder.upVote.getText().equals(mContext.getResources().getString(R.string.up_vote))) {
-                int newCount = updateUpVoteCount("upvote", feedItem.getFeedQuestionId(), feedItem.getFeedId(), count);
-                if(count!=newCount && count<newCount) {
-                    holder.upVoteCount.setText(getUpVoteCountText(count));
-                    holder.upVote.setText(R.string.up_voted);
-                    holder.upVote.setBackgroundColor(mContext.getResources().getColor(R.color.tranparant_primary));
-                }
+                updateUpVoteCount("upvote", feedItem.getFeedQuestionId(), feedItem.getFeedId(), count, holder.upVoteCount, holder.upVote);
             }
         });
     }
 
-    private int updateUpVoteCount(String action, Integer feedQuestionId, Integer feedId, Integer count) {
-        int[] upVoteCount = {count};
+    private void updateUpVoteCount(String action, Integer feedQuestionId, Integer feedId, Integer oldCount, Button upVoteCount, Button upVote) {
         if (isThereInternetConnection((Activity) mContext)) {
 
-            Observable<Integer> updateUpVoteCountObservable = getApiService().putUpVote(mCustomerId,feedQuestionId,action,feedId);
+            Observable<Integer> updateUpVoteCountObservable = getApiService().putUpVote(getJSessionIdInSharedPreferences(mContext), mCustomerId,feedQuestionId,action,feedId);
             mDisposable = updateUpVoteCountObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new DisposableObserver<Integer>() {
                         @Override
                         public void onNext(Integer count) {
-                            upVoteCount[0] = count;
+                            if(!oldCount.equals(count) && oldCount<count) {
+                                upVoteCount.setText(getUpVoteCountText(count));
+                                upVote.setText(R.string.up_voted);
+                                upVote.setBackgroundColor(mContext.getResources().getColor(R.color.tranparant_primary));
+                            }
+                            if(!oldCount.equals(count) && oldCount>count) {
+                                upVoteCount.setText(getUpVoteCountText(count));
+                                upVote.setText(R.string.up_vote);
+                                upVote.setBackgroundColor(mContext.getResources().getColor(R.color.colorPrimary));
+                            }
                         }
 
                         @Override
@@ -126,7 +121,6 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
                         }
                     });
         }
-        return  upVoteCount[0];
     }
 
     private int getUpvoteCount(String text) {

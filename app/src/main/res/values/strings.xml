@@ -40,4 +40,10 @@
     <string name="up_voted">Upvoted</string>
     <string name="up_vote">UpVote</string>
     <string name="up_votes">%s UpVotes</string>
+    <string name="profileimage_desc">profileImage</string>
+    <string name="post_qn_text">Post your question now…</string>
+    <string name="ask_now">Ask Now</string>
+    <string name="unfollow_txt">UnFollow</string>
+    <string name="follow_txt">Follow</string>
+    <string name="profile_user_name">%s\n%s</string>
 </resources>

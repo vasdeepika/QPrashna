@@ -8,4 +8,7 @@
     <color name="transparent">#80FFFFFF</color>
     <color name="tranparant_blue_green">#74C5AA</color>
     <color name="tranparant_primary">#94D2BD</color>
+    <color name="colorRed">#D75452</color>
+    <color name="colorAsk">#5FB760</color>
+    <color name="photo_placeholder">#ccc</color>
 </resources>

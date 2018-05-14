@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class UsersResponse {
 
+    public static final String KEY = "userResults";
+
     @SerializedName("userResult")
     @Expose
     private List<UserResult> userResult = null;
