@@ -31,4 +31,12 @@ public interface QPrashnaApis {
     @POST("isfollowing") // Get user
     Observable<String> isFollowing(@Body RequestBody isFollowingRequestBody);
 
+    @POST("follower/add") // Add follower
+    Observable<FollowUserResponse> followUser(@Header("Cookie") String sessionId, @Body RequestBody followUserRequestBody);
+
+    @POST("followee/remove") // Add follower
+    Observable<RemoveFolloweeResponse> unFollowUser(@Header("Cookie") String sessionId, @Body RequestBody followUserRequestBody);
+
+    @POST("question/post/") // Add follower
+    Observable<AskQuestionResponse> askQuestion(@Header("Cookie") String sessionId, @Body RequestBody askQuestionRequestBody);
 }

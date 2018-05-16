@@ -46,4 +46,5 @@
     <string name="unfollow_txt">UnFollow</string>
     <string name="follow_txt">Follow</string>
     <string name="profile_user_name">%s\n%s</string>
+    <string name="remove_success_text">Success</string>
 </resources>

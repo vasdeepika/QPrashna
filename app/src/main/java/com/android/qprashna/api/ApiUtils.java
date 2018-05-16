@@ -42,6 +42,27 @@ public class ApiUtils {
         return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
     }
 
+    public static RequestBody getFollowUserRequestBody(int userId, int followeeId) {
+        Map<String, Object> jsonParams = new ArrayMap<>();
+
+        jsonParams.put("userId", userId);
+        jsonParams.put("followeeId", followeeId);
+
+        return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
+    }
+
+    public static RequestBody askQuestionRequestBody(int userId, int askToUserId, String question) {
+        Map<String, Object> jsonParams = new ArrayMap<>();
+
+        jsonParams.put("originatorId", userId);
+        jsonParams.put("askedToUserId", askToUserId);
+        jsonParams.put("upvoteCount", 0);
+        jsonParams.put("questionStatus", "A");
+        jsonParams.put("questionText", question);
+
+        return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
+    }
+
     public static RequestBody getCreateAccountRequestBody(String userName, String password, String firstName, String lastName, String emailAddress) {
         Map<String, Object> jsonParams = new ArrayMap<>();
 
