@@ -42,6 +42,7 @@ import retrofit2.Response;
 import static com.android.qprashna.api.ApiUtils.getApiService;
 import static com.android.qprashna.api.ApiUtils.getCreateAccountRequestBody;
 import static com.android.qprashna.api.ApiUtils.getLoginRequestBody;
+import static com.android.qprashna.ui.common.ViewUtils.hideKeyboard;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
 import static com.android.qprashna.ui.common.ViewUtils.saveUserIdInSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
@@ -104,6 +105,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
         setNotRegisteredSpannableString();
         setLoginButtonOnClickListener();
         setRXJavaErrorHandling();
+        hideKeyboard(getActivity());
         return rootView;
     }
 

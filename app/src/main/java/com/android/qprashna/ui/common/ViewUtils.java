@@ -5,8 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.qprashna.R;
@@ -39,12 +38,8 @@ public class ViewUtils {
         return isConnected;
     }
 
-    public static void hideSoftKeyboard(AutoCompleteTextView input, Activity activity) {
-        input.setInputType(0);
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-        }
+    public static void hideKeyboard(Activity activity) {
+        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     public static void showErrorMessage(Context context, Throwable e) {

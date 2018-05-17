@@ -13,7 +13,6 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -40,6 +39,8 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.android.qprashna.api.ApiUtils.getApiService;
+import static com.android.qprashna.ui.common.ViewUtils.getUserIdFromSharedPreferences;
+import static com.android.qprashna.ui.common.ViewUtils.hideKeyboard;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
 import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
@@ -59,7 +60,7 @@ public class FeedsFragment extends Fragment {
     RecyclerView mFeedsRecyclerView;
 
     private int mCustomerId;
-    private String mFeedType;
+    private String mFragmentType;
     private Disposable mDisposable;
 
 
@@ -91,9 +92,10 @@ public class FeedsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCustomerId = getUserIdFromSharedPreferences(getActivity());
+
         if (getArguments() != null) {
-            mCustomerId = getArguments().getInt(FeedsFragment.CUSTOMER_ID);
-            mFeedType = getArguments().getString(FeedsFragment.FEED_TYPE, FeedTypes.GENERAL.toString());
+            mFragmentType = getArguments().getString(FeedsFragment.FEED_TYPE, FragmentTypes.GENERAL.toString());
         }
 
         if(savedInstanceState != null && savedInstanceState.containsKey(UsersResponse.KEY)) {
@@ -102,7 +104,6 @@ public class FeedsFragment extends Fragment {
     }
 
     private void setUpSearchAutoComplete() {
-//        hideSoftKeyboard(mSearchText, getActivity());
 
         mSearchText.setThreshold(2);
         mSearchText.setAdapter(mUsersAdapter);
@@ -226,7 +227,6 @@ public class FeedsFragment extends Fragment {
         mLayoutManager = new GridLayoutManager(getActivity(), columns);
         mFeedsRecyclerView.setLayoutManager(mLayoutManager);
 
-        mSearchText.setThreshold(1);
         mUsersAdapterList = new ArrayList<>();
         mUsersAdapter = new ArrayAdapter<>
                 (getActivity(), android.R.layout.select_dialog_item, mUsersAdapterList);
@@ -248,6 +248,7 @@ public class FeedsFragment extends Fragment {
 //            }
 //            recyclerView.setAdapter(new FeedsRecyclerViewAdapter());
 //        }
+        hideKeyboard(getActivity());
         return rootView;
     }
 
@@ -256,8 +257,19 @@ public class FeedsFragment extends Fragment {
             return;
         }
         if (isThereInternetConnection(getActivity())) {
-            Observable<FeedsResponse> feedsResponseObservable = getApiService().getFeeds(mCustomerId);
-            mDisposable = feedsResponseObservable
+            Observable<FeedsResponse> responseObservable = getApiService().getFeeds(mCustomerId);
+            if(mFragmentType.equals(FragmentTypes.GENERAL.toString())) {
+                responseObservable = getApiService().getFeeds(mCustomerId);
+            } else if(mFragmentType.equals(FragmentTypes.QUESTIONS_ANSWERED.toString())) {
+                responseObservable = getApiService().getAnsweredByMe(mCustomerId);
+            } else if(mFragmentType.equals(FragmentTypes.QUESTIONS_UNANSWERED.toString())) {
+                responseObservable = getApiService().getUnAnsweredByMe(mCustomerId);
+            } else if(mFragmentType.equals(FragmentTypes.QESTIONS_ASKED_BY_ME.toString())) {
+                responseObservable = getApiService().getQuestionsAskedByMe(mCustomerId);
+            } else if(mFragmentType.equals(FragmentTypes.QUESTIONS_UPVOTED.toString())) {
+                responseObservable = getApiService().getMyUpVotedQuestions(mCustomerId);
+            }
+            mDisposable = responseObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new DisposableObserver<FeedsResponse>() {
@@ -266,7 +278,7 @@ public class FeedsFragment extends Fragment {
                             showLoadingBar(false);
                             if (feedsResponse != null) {
                                 mfeedsResponse = feedsResponse;
-                                mAdapter.setFeeds(mfeedsResponse.getItems(), mCustomerId);
+                                mAdapter.setData(mfeedsResponse.getItems(), mCustomerId, mFragmentType);
                                 mFeedsRecyclerView.setVisibility(View.VISIBLE);                            }
                         }
 

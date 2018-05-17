@@ -2,7 +2,9 @@ package com.android.qprashna.ui.feeds;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +41,7 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
     private List<Item> mFeedsItems;
     private Context mContext;
     private int mCustomerId;
+    private String mFragmentType;
     private Disposable mDisposable;
 
     FeedsRecyclerViewAdapter() {
@@ -55,11 +58,22 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
     @Override
     public void onBindViewHolder(final CardViewHolder holder, int position) {
         Item feedItem = mFeedsItems.get(position);
-        holder.feedTitle.setText(feedItem.getFeedTitle());
-        holder.timeAgo.setText(feedItem.getTimeAgo());
-        holder.feedQuestion.setText(feedItem.getFeedQuestionText());
-        String askedBy = String.format(mContext.getResources().getString(R.string.asked_by_text),feedItem.getFeedQuestionAskedBy(), feedItem.getFeedQuestionAskedTO());
-        holder.askedBy.setText(askedBy);
+        String answeredBy = String.format(mContext.getResources().getString(R.string.answered_by_text), feedItem.getFeedQuestionAskedTOName(), feedItem.getFeedQuestionAskedByName());
+        String askedBy = String.format(mContext.getResources().getString(R.string.asked_by_text),feedItem.getFeedQuestionAskedByName(), feedItem.getFeedQuestionAskedTOName());
+        if(mFragmentType.equals(FragmentTypes.QUESTIONS_ANSWERED.toString())) {
+            holder.askedBy.setText(answeredBy);
+            holder.upVote.setVisibility(View.GONE);
+            holder.feedTitle.setText(feedItem.getFeedQuestionText());
+            holder.feedQuestion.setText(feedItem.getFeedAnswerText());
+            holder.feedQuestion.setTypeface(null, Typeface.NORMAL);
+            holder.feedTitle.setTypeface(null, Typeface.BOLD);
+            holder.timeAgo.setVisibility(View.GONE);
+        } else {
+            holder.askedBy.setText(askedBy);
+            holder.feedTitle.setText(feedItem.getFeedTitle());
+            holder.timeAgo.setText(feedItem.getTimeAgo());
+            holder.feedQuestion.setText(feedItem.getFeedQuestionText());
+        }
 
         int upVoteCount = 0;
 
@@ -140,9 +154,10 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
         }
     }
 
-    public void setFeeds(List<Item> feedsList, int customerId) {
+    public void setData(List<Item> feedsList, int customerId, String fragmentType) {
         mFeedsItems = feedsList;
         mCustomerId = customerId;
+        mFragmentType = fragmentType;
         notifyDataSetChanged();
     }
 

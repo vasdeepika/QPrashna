@@ -9,15 +9,15 @@
             android:icon="@drawable/ic_group_work_black_24dp"
             android:title="@string/nav_feeds_text" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_questions_answered_by_me"
             android:icon="@drawable/ic_question_answer_black_24dp"
             android:title="@string/nav_text_questions_answered_by_me" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_questions_unanswered_by_me"
             android:icon="@drawable/ic_question_answer_black_24dp"
             android:title="@string/nav_textquestions_unanswered_by_me" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_my_upvoted_questions"
             android:icon="@drawable/ic_thumb_up_black_24dp"
             android:title="@string/nav_text_my_upvoted_questions" />
 
@@ -40,11 +40,11 @@
     <item android:title="@string/nav_text_settings">
         <menu>
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/nav_edit_profile"
                 android:icon="@drawable/ic_edit_black_24dp"
                 android:title="@string/nav_text_edit_profile" />
             <item
-                android:id="@+id/nav_send"
+                android:id="@+id/nav_change_password"
                 android:icon="@drawable/ic_change_history_black_24dp"
                 android:title="@string/nav_text_change_password" />
         </menu>

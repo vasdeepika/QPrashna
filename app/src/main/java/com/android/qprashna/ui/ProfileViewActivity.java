@@ -1,8 +1,9 @@
 package com.android.qprashna.ui;
 
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -60,10 +61,10 @@ public class ProfileViewActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        ActionBar ab = getSupportActionBar();
-        if (ab != null) {
-            ab.setDisplayHomeAsUpEnabled(true);
-        }
+        //Enable up button
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null && bundle.containsKey(UserResult.PROFILE)) {
@@ -85,36 +86,33 @@ public class ProfileViewActivity extends AppCompatActivity {
     }
 
     private void setUpAskQuestion() {
-        askBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (question.getText().length() > 0) {
-                    if (isThereInternetConnection(ProfileViewActivity.this)) {
-                        Observable<AskQuestionResponse> askQuestionResponseObservable = getApiService().askQuestion(getJSessionIdInSharedPreferences(ProfileViewActivity.this), askQuestionRequestBody(getUserIdFromSharedPreferences(ProfileViewActivity.this), mUserResult.getId(), question.getText().toString()));
-                        mDisposable = askQuestionResponseObservable
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribeWith(new DisposableObserver<AskQuestionResponse>() {
-                                    @Override
-                                    public void onNext(AskQuestionResponse askQuestionResponse) {
-                                        if (askQuestionResponse != null && askQuestionResponse.getFeedQuestionText().equals(question.getText().toString())) {
-                                            Toast.makeText(getBaseContext(), "Your question submitted successfully!", Toast.LENGTH_LONG).show();
-                                            question.setText("");
-                                        }
+        askBtn.setOnClickListener(v -> {
+            if (question.getText().length() > 0) {
+                if (isThereInternetConnection(ProfileViewActivity.this)) {
+                    Observable<AskQuestionResponse> askQuestionResponseObservable = getApiService().askQuestion(getJSessionIdInSharedPreferences(ProfileViewActivity.this), askQuestionRequestBody(getUserIdFromSharedPreferences(ProfileViewActivity.this), mUserResult.getId(), question.getText().toString()));
+                    mDisposable = askQuestionResponseObservable
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeWith(new DisposableObserver<AskQuestionResponse>() {
+                                @Override
+                                public void onNext(AskQuestionResponse askQuestionResponse) {
+                                    if (askQuestionResponse != null && askQuestionResponse.getFeedQuestionText().equals(question.getText().toString())) {
+                                        Toast.makeText(getBaseContext(), "Your question submitted successfully!", Toast.LENGTH_LONG).show();
+                                        question.setText("");
                                     }
+                                }
 
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        // show error message if api call throws an error
-                                        showErrorMessage(getBaseContext(), e);
-                                    }
+                                @Override
+                                public void onError(Throwable e) {
+                                    // show error message if api call throws an error
+                                    showErrorMessage(getBaseContext(), e);
+                                }
 
-                                    @Override
-                                    public void onComplete() {
+                                @Override
+                                public void onComplete() {
 
-                                    }
-                                });
-                    }
+                                }
+                            });
                 }
             }
         });
@@ -162,14 +160,11 @@ public class ProfileViewActivity extends AppCompatActivity {
     }
 
     private void setUpFollowBtn() {
-        followButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (followButton.getText().equals(getResources().getString(R.string.follow_txt))) {
-                    followUser();
-                } else if (followButton.getText().equals(getResources().getString(R.string.unfollow_txt))) {
-                    unFollowUser();
-                }
+        followButton.setOnClickListener(v -> {
+            if (followButton.getText().equals(getResources().getString(R.string.follow_txt))) {
+                followUser();
+            } else if (followButton.getText().equals(getResources().getString(R.string.unfollow_txt))) {
+                unFollowUser();
             }
         });
     }
@@ -233,5 +228,16 @@ public class ProfileViewActivity extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
+        return(super.onOptionsItemSelected(item));
     }
 }

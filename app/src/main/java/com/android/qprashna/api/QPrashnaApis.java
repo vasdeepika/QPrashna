@@ -19,8 +19,20 @@ public interface QPrashnaApis {
     @POST("user/create") // create account api
     Observable<Response<LoginResponse>> createAccount(@Body RequestBody loginRequestbody);
 
-    @GET("{id}/feeds/0/10") // Get Feeds api
+    @GET("{id}/feeds/0/20") // Get Feeds api
     Observable<FeedsResponse> getFeeds(@Path("id") int id);
+
+    @GET("questions/answered/{id}/0/20") // Get Answered by user
+    Observable<FeedsResponse> getAnsweredByMe(@Path("id") int id);
+
+    @GET("questions/yettoanswer/{id}/0/20") // Get UnAnswered by user
+    Observable<FeedsResponse> getUnAnsweredByMe(@Path("id") int id);
+
+    @GET("questions/upvotedby/{id}/0/20") // Get my up voted questions
+    Observable<FeedsResponse> getMyUpVotedQuestions(@Path("id") int id);
+
+    @GET("questions/askedby/{id}/0/20") // Get asked by user
+    Observable<FeedsResponse> getQuestionsAskedByMe(@Path("id") int id);
 
     @PUT("{id}/question/upvote/{questionId}") // Put upVote or unUpVote count
     Observable<Integer> putUpVote(@Header("Cookie") String sessionId, @Path("id") int id, @Path("questionId") int questionId, @Query("action") String action, @Query("feedId") int feedId);

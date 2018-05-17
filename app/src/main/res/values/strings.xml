@@ -19,7 +19,7 @@
     <string name="registered_signin_now">Already registered? Sign In now!</string>
     <string name="network_error">Network is not available.  Please check your network connection and try again…</string>
     <string name="try_again_text">Something went wrong.  Please try again.</string>
-    <string name="title_activity_feeds">FeedsActivity</string>
+    <string name="title_activity_feeds">Feeds</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
@@ -36,7 +36,8 @@
     <string name="nav_text_change_password">Change Password</string>
     <string name="nav_text_sign_out">Sign Out</string>
     <string name="search_for_person_text">Search for person…</string>
-    <string name="asked_by_text">Asked By %s to %s on</string>
+    <string name="asked_by_text">Asked By %s to %s</string>
+    <string name="answered_by_text">Answered By %s for %s</string>
     <string name="up_voted">Upvoted</string>
     <string name="up_vote">UpVote</string>
     <string name="up_votes">%s UpVotes</string>
@@ -47,4 +48,5 @@
     <string name="follow_txt">Follow</string>
     <string name="profile_user_name">%s\n%s</string>
     <string name="remove_success_text">Success</string>
+    <string name="ask_qtn">Ask Question</string>
 </resources>

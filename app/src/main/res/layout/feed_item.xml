@@ -14,7 +14,7 @@
             android:paddingStart="6dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/time_ago"
+            app:layout_constraintLeft_toLeftOf="parent"
             android:textSize="14sp"/>
 
         <TextView android:id="@+id/time_ago"
@@ -25,7 +25,7 @@
             android:paddingEnd="6dp"
             android:paddingStart="6dp"
             app:layout_constraintTop_toBottomOf="@+id/feed_title"
-            app:layout_constraintLeft_toRightOf="@+id/feed_title"
+            app:layout_constraintRight_toRightOf="@+id/feed_title"
             app:layout_constraintEnd_toEndOf="parent"
             android:textSize="12sp"/>
 
@@ -52,7 +52,7 @@
             app:layout_constraintTop_toBottomOf="@+id/divider"
             app:layout_constraintBottom_toTopOf="@+id/asked_by"
             android:textStyle="bold"
-            android:textSize="20sp"/>
+            android:textSize="@dimen/feed_qtn_text_size"/>
 
         <TextView android:id="@+id/asked_by"
             android:layout_width="match_parent"
