@@ -1,5 +1,6 @@
 package com.android.qprashna.ui.login;
 
+import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -9,7 +10,9 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
 import com.android.qprashna.R;
-import com.android.qprashna.ui.login.SectionsPagerAdapter;
+import com.android.qprashna.ui.feeds.MainActivity;
+
+import static com.android.qprashna.ui.common.ViewUtils.getUserIdFromSharedPreferences;
 
 public class SignInCreateAccountActivity extends AppCompatActivity {
 
@@ -32,6 +35,9 @@ public class SignInCreateAccountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_create_account);
+        if( getUserIdFromSharedPreferences(this) > 0) {
+            launchMainActivity();
+        }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -47,5 +53,13 @@ public class SignInCreateAccountActivity extends AppCompatActivity {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+    }
+
+    public void launchMainActivity() {
+        Intent mainActivityIntent =
+                new Intent(this, MainActivity.class);
+        mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(mainActivityIntent);
+        finish();
     }
 }

@@ -1,6 +1,6 @@
 package com.android.qprashna.ui.login;
 
-import android.content.Intent;
+import android.content.ContentValues;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
@@ -24,10 +24,8 @@ import android.widget.Toast;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.LoginResponse;
+import com.android.qprashna.data.QprashnaContract;
 import com.android.qprashna.ui.common.TranslucentProgressBar;
-import com.android.qprashna.ui.feeds.MainActivity;
-
-import org.parceler.Parcels;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -197,7 +195,8 @@ public class SignInOrCreateAccountFragment extends Fragment {
                             if (loginResponse.body() != null) {
                                 mLoginResponse = loginResponse.body();
                                 saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
-                                launchFeedsActivity();
+                                saveProfileInfo();
+                                ((SignInCreateAccountActivity)getActivity()).launchMainActivity();
                             }
                         }
 
@@ -216,15 +215,22 @@ public class SignInOrCreateAccountFragment extends Fragment {
         }
     }
 
-    private void launchFeedsActivity() {
-        Intent feedsActivityIntent =
-                new Intent(getContext(), MainActivity.class);
-        feedsActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(LoginResponse.KEY, Parcels.wrap(mLoginResponse));
-        feedsActivityIntent.putExtras(bundle);
-        startActivity(feedsActivityIntent);
-        getActivity().finish();
+    private void saveProfileInfo() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(QprashnaContract.ProfileEntry.USERID, mLoginResponse.getId());
+        contentValues.put(QprashnaContract.ProfileEntry.FIRSTNAME, mLoginResponse.getFirstName());
+        contentValues.put(QprashnaContract.ProfileEntry.LASTNAME, mLoginResponse.getLastName());
+        contentValues.put(QprashnaContract.ProfileEntry.EMAIL, mLoginResponse.getEmail());
+        contentValues.put(QprashnaContract.ProfileEntry.PROFILEPIC, mLoginResponse.getProfilePicURL());
+        contentValues.put(QprashnaContract.ProfileEntry.DESIGNATION, mLoginResponse.getDesignation());
+        contentValues.put(QprashnaContract.ProfileEntry.DOB, mLoginResponse.getDateOfBirth());
+        contentValues.put(QprashnaContract.ProfileEntry.GENDER, mLoginResponse.getGender());
+        contentValues.put(QprashnaContract.ProfileEntry.COUNTRY, mLoginResponse.getCountry());
+        contentValues.put(QprashnaContract.ProfileEntry.STATE, mLoginResponse.getState());
+
+
+        // Insert the content values via a ContentResolver
+        getActivity().getContentResolver().insert(QprashnaContract.ProfileEntry.CONTENT_URI, contentValues);
     }
 
     private void loginCall(String userName, String password) {
@@ -247,7 +253,8 @@ public class SignInOrCreateAccountFragment extends Fragment {
                                 if (loginResponseResponse.body() != null) {
                                     mLoginResponse = loginResponseResponse.body();
                                     saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
-                                    launchFeedsActivity();
+                                    saveProfileInfo();
+                                    ((SignInCreateAccountActivity)getActivity()).launchMainActivity();
                                 }
                             }
                         }

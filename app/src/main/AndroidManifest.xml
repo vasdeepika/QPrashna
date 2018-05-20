@@ -48,14 +48,21 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_feeds"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.ProfileViewActivity"
+        <activity
+            android:name=".ui.ProfileViewActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/ask_qtn"
-            android:theme="@style/AppTheme" android:parentActivityName=".ui.feeds.MainActivity">
+            android:parentActivityName=".ui.feeds.MainActivity"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.feeds.MainActivity"/>
+                android:value=".ui.feeds.MainActivity" />
         </activity>
+
+        <provider
+            android:name=".data.QprashnaContentProvider"
+            android:authorities="com.android.qprashna"
+            android:exported="true"/>
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package com.android.qprashna.ui;
 
+import android.content.ContentValues;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -11,6 +12,8 @@ import android.widget.Toast;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.LoginResponse;
+import com.android.qprashna.api.ProfileDataObject;
+import com.android.qprashna.data.QprashnaContract;
 import com.android.qprashna.ui.common.TranslucentProgressBar;
 import com.android.qprashna.ui.feeds.MainActivity;
 
@@ -37,6 +40,7 @@ import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 public class EditProfileFragment extends Fragment {
 
     public LoginResponse mLoginResponse;
+    public ProfileDataObject mProfileDataObject;
     TranslucentProgressBar mProgressBar;
 
     @BindView(R.id.edit_profile_layout_first_name)
@@ -75,9 +79,6 @@ public class EditProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mLoginResponse = Parcels.unwrap(getArguments().getParcelable(LoginResponse.KEY));
-        }
     }
 
     @Override
@@ -87,17 +88,18 @@ public class EditProfileFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
         ButterKnife.bind(this, rootView);
         mProgressBar = TranslucentProgressBar.getInstance();
+        mProfileDataObject = MainActivity.getProfileDetails(getActivity());
 
-        if (mLoginResponse != null) {
-            firstNameLayout.getEditText().setText(mLoginResponse.getFirstName());
-            lastNameLayout.getEditText().setText(mLoginResponse.getLastName());
-            emailAddressLayout.getEditText().setText(mLoginResponse.getEmail());
-            genderLayout.getEditText().setText(mLoginResponse.getGender());
-            designationLayout.getEditText().setText(mLoginResponse.getDesignation());
-            countryLayout.getEditText().setText(mLoginResponse.getCountry());
-            stateLayout.getEditText().setText(mLoginResponse.getState());
+        if (mProfileDataObject != null) {
+            firstNameLayout.getEditText().setText(mProfileDataObject.getFirstName());
+            lastNameLayout.getEditText().setText(mProfileDataObject.getLastName());
+            emailAddressLayout.getEditText().setText(mProfileDataObject.getEmail());
+            genderLayout.getEditText().setText(mProfileDataObject.getGender());
+            designationLayout.getEditText().setText(mProfileDataObject.getDesignation());
+            countryLayout.getEditText().setText(mProfileDataObject.getCountry());
+            stateLayout.getEditText().setText(mProfileDataObject.getState());
 
-            long val = mLoginResponse.getDateOfBirth();
+            long val = mProfileDataObject.getDob();
             Date date = new Date(val);
 
             SimpleDateFormat df2 = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
@@ -129,7 +131,7 @@ public class EditProfileFragment extends Fragment {
                                 mProgressBar.unShowProgress();
                                 if (loginResponse != null) {
                                     mLoginResponse = loginResponse;
-                                    ((MainActivity) getActivity()).setLoginResponse(mLoginResponse);
+                                    updateProfileData();
                                     Toast.makeText(getActivity(), R.string.profile_updated_text, Toast.LENGTH_LONG).show();
                                 }
                             }
@@ -148,6 +150,24 @@ public class EditProfileFragment extends Fragment {
                         });
             }
         }
+    }
+
+    private void updateProfileData() {
+        // update profile via  a ContentResolver
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(QprashnaContract.ProfileEntry.USERID, mLoginResponse.getId());
+        contentValues.put(QprashnaContract.ProfileEntry.FIRSTNAME, mLoginResponse.getFirstName());
+        contentValues.put(QprashnaContract.ProfileEntry.LASTNAME, mLoginResponse.getLastName());
+        contentValues.put(QprashnaContract.ProfileEntry.EMAIL, mLoginResponse.getEmail());
+        contentValues.put(QprashnaContract.ProfileEntry.PROFILEPIC, mLoginResponse.getProfilePicURL());
+        contentValues.put(QprashnaContract.ProfileEntry.DESIGNATION, mLoginResponse.getDesignation());
+        contentValues.put(QprashnaContract.ProfileEntry.DOB, mLoginResponse.getDateOfBirth());
+        contentValues.put(QprashnaContract.ProfileEntry.GENDER, mLoginResponse.getGender());
+        contentValues.put(QprashnaContract.ProfileEntry.COUNTRY, mLoginResponse.getCountry());
+        contentValues.put(QprashnaContract.ProfileEntry.STATE, mLoginResponse.getState());
+
+        getActivity().getContentResolver().update(QprashnaContract.ProfileEntry.CONTENT_URI, contentValues, null, null);
     }
 
     @Override

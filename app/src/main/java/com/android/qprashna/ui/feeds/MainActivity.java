@@ -1,6 +1,8 @@
 package com.android.qprashna.ui.feeds;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -13,7 +15,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.android.qprashna.R;
-import com.android.qprashna.api.LoginResponse;
+import com.android.qprashna.api.ProfileDataObject;
+import com.android.qprashna.data.QprashnaContract;
 import com.android.qprashna.ui.ChangePasswordFragment;
 import com.android.qprashna.ui.EditProfileFragment;
 import com.android.qprashna.ui.login.SignInCreateAccountActivity;
@@ -26,7 +29,7 @@ import static com.android.qprashna.ui.common.ViewUtils.storeJSessionIdInSharedPr
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    LoginResponse mLoginResponse;
+    ProfileDataObject mProfileDetails;
     NavigationView navigationView;
     Toolbar mToolbar;
 
@@ -52,10 +55,8 @@ public class MainActivity extends AppCompatActivity
 
         View headerView = navigationView.getHeaderView(0);
 
-        Bundle bundle = getIntent().getExtras();
-        if (savedInstanceState == null && bundle != null && bundle.containsKey(LoginResponse.KEY)) {
-            mLoginResponse = Parcels.unwrap(
-                    bundle.getParcelable(LoginResponse.KEY));
+        if (savedInstanceState == null) {
+            mProfileDetails = getProfileDetails(this);
 
             FeedsFragment feedsFragment = new FeedsFragment();
             Bundle fragmentBundle = new Bundle();
@@ -67,14 +68,14 @@ public class MainActivity extends AppCompatActivity
                     .commit();
         }
 
-        if(savedInstanceState != null) {
-            mLoginResponse = Parcels.unwrap(savedInstanceState.getParcelable(LoginResponse.KEY));
+        if (savedInstanceState != null) {
+            mProfileDetails = Parcels.unwrap(savedInstanceState.getParcelable(ProfileDataObject.KEY));
         }
 
-        if(mLoginResponse!=null) {
+        if (mProfileDetails != null) {
             //Setting nav drawer header texts
-            ((TextView) (headerView.findViewById(R.id.nav_user_name))).setText(String.format("%s %s", mLoginResponse.getFirstName(), mLoginResponse.getLastName()));
-            ((TextView) (headerView.findViewById(R.id.nav_user_email))).setText(mLoginResponse.getEmail());
+            ((TextView) (headerView.findViewById(R.id.nav_user_name))).setText(String.format("%s %s", mProfileDetails.getFirstName(), mProfileDetails.getLastName()));
+            ((TextView) (headerView.findViewById(R.id.nav_user_email))).setText(mProfileDetails.getEmail());
         }
     }
 
@@ -187,9 +188,6 @@ public class MainActivity extends AppCompatActivity
         } else if (navDrawerSelectedItemId == R.id.nav_edit_profile) {
             mToolbar.setTitle(R.string.title_edit_profiile);
             EditProfileFragment editProfileFragment = new EditProfileFragment();
-            Bundle fragmentBundle = new Bundle();
-            fragmentBundle.putParcelable(LoginResponse.KEY, Parcels.wrap(mLoginResponse));
-            editProfileFragment.setArguments(fragmentBundle);
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.qprashna_fragment, editProfileFragment, QPRASHNA_FRAGMENT)
@@ -210,6 +208,7 @@ public class MainActivity extends AppCompatActivity
                 //clearing shared preferences after sign out
                 saveUserIdInSharedPreferences(this, 0);
                 storeJSessionIdInSharedPreferences(this, "");
+                deleteProfileData();
 
                 Intent signInCreateAccountIntent =
                         new Intent(this, SignInCreateAccountActivity.class);
@@ -223,6 +222,10 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void deleteProfileData() {
+        getContentResolver().delete(QprashnaContract.ProfileEntry.CONTENT_URI,null,null);
+    }
+
     public void clearSearchText(View view) {
         FeedsFragment feedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.qprashna_fragment);
         if (feedsFragment != null) {
@@ -230,15 +233,39 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void setLoginResponse(LoginResponse loginResponse) {
-        mLoginResponse = loginResponse;
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         // Save outState
-        outState.putParcelable(LoginResponse.KEY, Parcels.wrap(mLoginResponse));
+        outState.putParcelable(ProfileDataObject.KEY, Parcels.wrap(mProfileDetails));
+    }
+
+    public static ProfileDataObject getProfileDetails(Context context) {
+        // get
+
+        Cursor profileCursor = context.getContentResolver().query(QprashnaContract.ProfileEntry.CONTENT_URI,
+                null, null, null, null);
+
+        ProfileDataObject profileDetails = new ProfileDataObject();
+
+        if (profileCursor != null && profileCursor.moveToFirst()) {
+
+            profileDetails.setUserId(profileCursor.getInt(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.USERID)));
+            profileDetails.setFirstName(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.FIRSTNAME)));
+            profileDetails.setLastName(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.LASTNAME)));
+            profileDetails.setEmail(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.EMAIL)));
+            profileDetails.setDesignation(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.DESIGNATION)));
+            profileDetails.setDob(profileCursor.getLong(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.DOB)));
+            profileDetails.setCountry(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.COUNTRY)));
+            profileDetails.setState(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.STATE)));
+            profileDetails.setProfilePicURL(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.PROFILEPIC)));
+        }
+
+        if (profileCursor != null) {
+            profileCursor.close();
+        }
+
+        return profileDetails;
     }
 }
