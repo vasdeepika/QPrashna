@@ -2,6 +2,7 @@ package com.android.qprashna.ui.feeds;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +15,8 @@ import android.widget.ProgressBar;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.FollowersResponse;
+
+import org.parceler.Parcels;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,6 +43,10 @@ public class FollowersFragment extends Fragment {
     private int mCustomerId;
     private String mFragmentType;
 
+    public static final String FOLLOWERS_LIST_STATE_KEY = "followers_list_state";
+
+    private static final String FRAGMENT_TYPE = "followers_fragment";
+
     private MyFollowerItemRecyclerViewAdapter mAdapter;
     private Disposable mDisposable;
     private GridLayoutManager mLayoutManager;
@@ -49,6 +56,7 @@ public class FollowersFragment extends Fragment {
 
     @BindView(R.id.followers_list)
     RecyclerView mFollowersRecyclerView;
+    private Parcelable mListState;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -77,8 +85,6 @@ public class FollowersFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_followers_list, container, false);
         ButterKnife.bind(this, view);
 
-        showLoadingBar(true);
-
         mAdapter = new MyFollowerItemRecyclerViewAdapter();
         mFollowersRecyclerView.setAdapter(mAdapter);
         mFollowersRecyclerView.setHasFixedSize(true);
@@ -93,8 +99,17 @@ public class FollowersFragment extends Fragment {
         mLayoutManager = new GridLayoutManager(getActivity(), columns);
         mFollowersRecyclerView.setLayoutManager(mLayoutManager);
 
-        getFollowers();
-
+        if (savedInstanceState == null) {
+            getFollowers();
+        } else {
+            mFollowersResponse = Parcels.unwrap(savedInstanceState.getParcelable(FollowersResponse.KEY));
+            mFragmentType = Parcels.unwrap(savedInstanceState.getParcelable(FollowersFragment.FRAGMENT_TYPE));
+            mAdapter.setData(mFollowersResponse.getItems(), getUserIdFromSharedPreferences(getActivity()), mFragmentType);
+            // Restoring recycler view position
+            mListState = savedInstanceState.getParcelable(FOLLOWERS_LIST_STATE_KEY);
+            mFollowersRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+            mFollowersRecyclerView.setVisibility(View.VISIBLE);
+        }
         return view;
     }
 
@@ -103,6 +118,7 @@ public class FollowersFragment extends Fragment {
             return;
         }
         if (isThereInternetConnection(getActivity())) {
+            showLoadingBar(true);
             Observable<FollowersResponse> responseObservable = getApiService().getFollowers(getJSessionIdInSharedPreferences(getActivity()), mCustomerId);
             if (mFragmentType.equals(FragmentTypes.FOLLOWERS.toString())) {
                 responseObservable = getApiService().getFollowers(getJSessionIdInSharedPreferences(getActivity()), mCustomerId);
@@ -157,12 +173,23 @@ public class FollowersFragment extends Fragment {
     }
 
     private void showLoadingBar(boolean flag) {
-        if(flag && mLoadingBar != null && mLoadingBar.getVisibility() != View.VISIBLE) {
+        if (flag && mLoadingBar != null && mLoadingBar.getVisibility() != View.VISIBLE) {
             mLoadingBar.setVisibility(View.VISIBLE);
-        }else  if(!flag && mLoadingBar != null && mLoadingBar.getVisibility() != View.GONE) {
+        } else if (!flag && mLoadingBar != null && mLoadingBar.getVisibility() != View.GONE) {
             mLoadingBar.setVisibility(View.GONE);
         }
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save outState
+        mListState = mLayoutManager.onSaveInstanceState();
+        outState.putParcelable(FOLLOWERS_LIST_STATE_KEY, mListState);
+        outState.putParcelable(FollowersResponse.KEY, Parcels.wrap(mFollowersResponse));
+        outState.putParcelable(FollowersFragment.FRAGMENT_TYPE, Parcels.wrap(mFragmentType));
+        outState.putParcelable(FeedsFragment.FEED_TYPE, Parcels.wrap(mFragmentType));
+    }
 }

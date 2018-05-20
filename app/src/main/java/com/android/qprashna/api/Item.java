@@ -3,122 +3,125 @@ package com.android.qprashna.api;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.parceler.Parcel;
+
+@Parcel
 public class Item {
 
     @SerializedName("feedId")
     @Expose
-    private Integer feedId;
+    protected Integer feedId;
     @SerializedName("feedType")
     @Expose
-    private String feedType;
+    protected String feedType;
     @SerializedName("feedQuestionId")
     @Expose
-    private Integer feedQuestionId;
+    protected Integer feedQuestionId;
     @SerializedName("questionUpvoteCount")
     @Expose
-    private Integer questionUpvoteCount;
+    protected Integer questionUpvoteCount;
     @SerializedName("feedQuestionText")
     @Expose
-    private String feedQuestionText;
+    protected String feedQuestionText;
     @SerializedName("feedCleanQuestionText")
     @Expose
-    private String feedCleanQuestionText;
+    protected String feedCleanQuestionText;
     @SerializedName("feedQuestionAskedBy")
     @Expose
-    private String feedQuestionAskedBy;
+    protected String feedQuestionAskedBy;
     @SerializedName("feedQuestionAskedByName")
     @Expose
-    private String feedQuestionAskedByName;
+    protected String feedQuestionAskedByName;
     @SerializedName("feedQuestionAskedTO")
     @Expose
-    private String feedQuestionAskedTO;
+    protected String feedQuestionAskedTO;
     @SerializedName("feedQuestionAskedTOName")
     @Expose
-    private String feedQuestionAskedTOName;
+    protected String feedQuestionAskedTOName;
     @SerializedName("timeAgo")
     @Expose
-    private String timeAgo;
+    protected String timeAgo;
     @SerializedName("feedAnswerLikeCount")
     @Expose
-    private Integer feedAnswerLikeCount;
+    protected Integer feedAnswerLikeCount;
     @SerializedName("feedAnswerCommentCount")
     @Expose
-    private Integer feedAnswerCommentCount;
+    protected Integer feedAnswerCommentCount;
     @SerializedName("feedAnswerDislikeCount")
     @Expose
-    private Integer feedAnswerDislikeCount;
+    protected Integer feedAnswerDislikeCount;
     @SerializedName("insertTime")
     @Expose
-    private long insertTime;
+    protected long insertTime;
     @SerializedName("updateTime")
     @Expose
-    private long updateTime;
+    protected long updateTime;
     @SerializedName("questionInsertTime")
     @Expose
-    private long questionInsertTime;
+    protected long questionInsertTime;
     @SerializedName("answerDisliked")
     @Expose
-    private String answerDisliked;
+    protected String answerDisliked;
     @SerializedName("answerLiked")
     @Expose
-    private String answerLiked;
+    protected String answerLiked;
     @SerializedName("postDisliked")
     @Expose
-    private String postDisliked;
+    protected String postDisliked;
     @SerializedName("postLiked")
     @Expose
-    private String postLiked;
+    protected String postLiked;
     @SerializedName("upvoted")
     @Expose
-    private String upvoted;
+    protected String upvoted;
     @SerializedName("isBookMarked")
     @Expose
-    private Boolean isBookMarked;
+    protected Boolean isBookMarked;
     @SerializedName("feedQuestionAskedByUserName")
     @Expose
-    private String feedQuestionAskedByUserName;
+    protected String feedQuestionAskedByUserName;
     @SerializedName("feedQuestionAskedToUserName")
     @Expose
-    private String feedQuestionAskedToUserName;
+    protected String feedQuestionAskedToUserName;
     @SerializedName("feedTitle")
     @Expose
-    private String feedTitle;
+    protected String feedTitle;
     @SerializedName("feedPostId")
     @Expose
-    private Integer feedPostId;
+    protected Integer feedPostId;
     @SerializedName("feedPostText")
     @Expose
-    private String feedPostText;
+    protected String feedPostText;
     @SerializedName("feedPostBy")
     @Expose
-    private String feedPostBy;
+    protected String feedPostBy;
     @SerializedName("feedPostByUserId")
     @Expose
-    private Integer feedPostByUserId;
+    protected Integer feedPostByUserId;
     @SerializedName("feedPostLikeCount")
     @Expose
-    private Integer feedPostLikeCount;
+    protected Integer feedPostLikeCount;
     @SerializedName("feedPostCommentCount")
     @Expose
-    private Integer feedPostCommentCount;
+    protected Integer feedPostCommentCount;
     @SerializedName("feedPostDislikeCount")
     @Expose
-    private Integer feedPostDislikeCount;
+    protected Integer feedPostDislikeCount;
     @SerializedName("feedPostedByUserName")
     @Expose
-    private String feedPostedByUserName;
+    protected String feedPostedByUserName;
     @SerializedName("feedQuestionAnswerId")
     @Expose
-    private Integer feedQuestionAnswerId;
+    protected Integer feedQuestionAnswerId;
     @SerializedName("feedAnswerText")
     @Expose
-    private String feedAnswerText;
+    protected String feedAnswerText;
     @SerializedName("answerInsertTime")
     @Expose
-    private long answerInsertTime;
+    protected long answerInsertTime;
     @SerializedName("answerEditCount")
     @Expose
-    private Integer answerEditCount;
+    protected Integer answerEditCount;
 
     public Integer getFeedId() {
         return feedId;

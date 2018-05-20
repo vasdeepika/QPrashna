@@ -4,26 +4,31 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class FeedsResponse {
+import org.parceler.Parcel;
 
+@Parcel
+public class FeedsResponse {
+    
+    public static final String KEY = "feeds"
+;
     @SerializedName("items")
     @Expose
-    private List<Item> items = null;
+    protected List<Item> items = null;
     @SerializedName("currentCount")
     @Expose
-    private Integer currentCount;
+    protected Integer currentCount;
     @SerializedName("maxPKValue")
     @Expose
-    private Integer maxPKValue;
+    protected Integer maxPKValue;
     @SerializedName("totalNumberOfRecords")
     @Expose
-    private Integer totalNumberOfRecords;
+    protected Integer totalNumberOfRecords;
     @SerializedName("pageId")
     @Expose
-    private Integer pageId;
+    protected Integer pageId;
     @SerializedName("totalNumberOfPages")
     @Expose
-    private Integer totalNumberOfPages;
+    protected Integer totalNumberOfPages;
 
     public List<Item> getItems() {
         return items;

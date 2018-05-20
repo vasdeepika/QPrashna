@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity
     Toolbar mToolbar;
 
     public static final String QPRASHNA_FRAGMENT = "fragment";
+    private int navDrawerSelectedItemId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +53,9 @@ public class MainActivity extends AppCompatActivity
         View headerView = navigationView.getHeaderView(0);
 
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null && bundle.containsKey(LoginResponse.KEY)) {
+        if (savedInstanceState == null && bundle != null && bundle.containsKey(LoginResponse.KEY)) {
             mLoginResponse = Parcels.unwrap(
                     bundle.getParcelable(LoginResponse.KEY));
-
-            //Setting nav drawer header texts
-            ((TextView) (headerView.findViewById(R.id.nav_user_name))).setText(String.format("%s %s", mLoginResponse.getFirstName(), mLoginResponse.getLastName()));
-            ((TextView) (headerView.findViewById(R.id.nav_user_email))).setText(mLoginResponse.getEmail());
 
             FeedsFragment feedsFragment = new FeedsFragment();
             Bundle fragmentBundle = new Bundle();
@@ -68,6 +65,16 @@ public class MainActivity extends AppCompatActivity
                     .beginTransaction()
                     .add(R.id.qprashna_fragment, feedsFragment, QPRASHNA_FRAGMENT)
                     .commit();
+        }
+
+        if(savedInstanceState != null) {
+            mLoginResponse = Parcels.unwrap(savedInstanceState.getParcelable(LoginResponse.KEY));
+        }
+
+        if(mLoginResponse!=null) {
+            //Setting nav drawer header texts
+            ((TextView) (headerView.findViewById(R.id.nav_user_name))).setText(String.format("%s %s", mLoginResponse.getFirstName(), mLoginResponse.getLastName()));
+            ((TextView) (headerView.findViewById(R.id.nav_user_email))).setText(mLoginResponse.getEmail());
         }
     }
 
@@ -85,9 +92,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        navDrawerSelectedItemId = item.getItemId();
 
-        if (id == R.id.nav_feeds) {
+        if (navDrawerSelectedItemId == R.id.nav_feeds) {
             if (!navigationView.getMenu().getItem(0).isChecked()) {
                 mToolbar.setTitle(R.string.title_activity_feeds);
                 FeedsFragment feedsFragment = new FeedsFragment();
@@ -100,7 +107,7 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
             // Handle the camera action
-        } else if (id == R.id.nav_questions_answered_by_me) {
+        } else if (navDrawerSelectedItemId == R.id.nav_questions_answered_by_me) {
             if (!navigationView.getMenu().getItem(1).isChecked()) {
                 mToolbar.setTitle(R.string.title_activity_qtns_answered_by_me);
                 FeedsFragment feedsFragment = new FeedsFragment();
@@ -113,7 +120,7 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
 
-        } else if (id == R.id.nav_questions_unanswered_by_me) {
+        } else if (navDrawerSelectedItemId == R.id.nav_questions_unanswered_by_me) {
             if (!navigationView.getMenu().getItem(2).isChecked()) {
                 mToolbar.setTitle(R.string.title_activity_qtns_un_answered_by_me);
                 FeedsFragment feedsFragment = new FeedsFragment();
@@ -126,7 +133,7 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
 
-        } else if (id == R.id.nav_my_upvoted_questions) {
+        } else if (navDrawerSelectedItemId == R.id.nav_my_upvoted_questions) {
             if (!navigationView.getMenu().getItem(3).isChecked()) {
                 mToolbar.setTitle(R.string.title_activity_qtns_my_upvoted_qtns);
                 FeedsFragment feedsFragment = new FeedsFragment();
@@ -139,7 +146,7 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
 
-        } else if (id == R.id.nav_my_questions) {
+        } else if (navDrawerSelectedItemId == R.id.nav_my_questions) {
             if (!navigationView.getMenu().getItem(4).isChecked()) {
                 mToolbar.setTitle(R.string.title_activity_qtns_asked_by_me);
                 FeedsFragment questionAskedByMeFragment = new FeedsFragment();
@@ -152,7 +159,7 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
 
-        } else if (id == R.id.nav_followers) {
+        } else if (navDrawerSelectedItemId == R.id.nav_followers) {
             if (!navigationView.getMenu().getItem(5).isChecked()) {
                 mToolbar.setTitle(R.string.title_followers);
                 FollowersFragment followersFragment = new FollowersFragment();
@@ -165,7 +172,7 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
 
-        } else if (id == R.id.nav_following) {
+        } else if (navDrawerSelectedItemId == R.id.nav_following) {
             if (!navigationView.getMenu().getItem(6).isChecked()) {
                 mToolbar.setTitle(R.string.title_following);
                 FollowersFragment followingsFragment = new FollowersFragment();
@@ -177,7 +184,7 @@ public class MainActivity extends AppCompatActivity
                         .replace(R.id.qprashna_fragment, followingsFragment, QPRASHNA_FRAGMENT)
                         .commit();
             }
-        } else if (id == R.id.nav_edit_profile) {
+        } else if (navDrawerSelectedItemId == R.id.nav_edit_profile) {
             mToolbar.setTitle(R.string.title_edit_profiile);
             EditProfileFragment editProfileFragment = new EditProfileFragment();
             Bundle fragmentBundle = new Bundle();
@@ -188,7 +195,7 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.qprashna_fragment, editProfileFragment, QPRASHNA_FRAGMENT)
                     .commit();
 
-        } else if (id == R.id.nav_change_password) {
+        } else if (navDrawerSelectedItemId == R.id.nav_change_password) {
             mToolbar.setTitle(R.string.title_change_password);
             ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
             Bundle fragmentBundle = new Bundle();
@@ -197,7 +204,7 @@ public class MainActivity extends AppCompatActivity
                     .beginTransaction()
                     .replace(R.id.qprashna_fragment, changePasswordFragment, QPRASHNA_FRAGMENT)
                     .commit();
-        } else if (id == R.id.nav_sign_out) {
+        } else if (navDrawerSelectedItemId == R.id.nav_sign_out) {
             if (!navigationView.getMenu().getItem(8).isChecked()) {
 
                 //clearing shared preferences after sign out
@@ -225,5 +232,13 @@ public class MainActivity extends AppCompatActivity
 
     public void setLoginResponse(LoginResponse loginResponse) {
         mLoginResponse = loginResponse;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save outState
+        outState.putParcelable(LoginResponse.KEY, Parcels.wrap(mLoginResponse));
     }
 }

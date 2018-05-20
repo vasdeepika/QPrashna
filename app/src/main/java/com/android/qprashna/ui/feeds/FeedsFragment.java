@@ -3,6 +3,7 @@ package com.android.qprashna.ui.feeds;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -65,29 +66,18 @@ public class FeedsFragment extends Fragment {
     private Disposable mDisposable;
 
 
-    public static final String CUSTOMER_ID = "customer";
     public static final String FEED_TYPE = "feed_type";
+    public static final String LIST_STATE_KEY = "list_state";
     private FeedsResponse mfeedsResponse;
     private FeedsRecyclerViewAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
     private List<UserResult> mUsersResults;
     ArrayList<String> mUsersAdapterList;
     private ArrayAdapter<String> mUsersAdapter;
+    private Parcelable mListState;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public FeedsFragment() {
     }
-
-//    @SuppressWarnings("unused")
-//    public static FeedsFragment newInstance(int columnCount) {
-//        FeedsFragment fragment = new FeedsFragment();
-//        Bundle args = new Bundle();
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,10 +88,6 @@ public class FeedsFragment extends Fragment {
 
             if (getArguments() != null) {
                 mFragmentType = getArguments().getString(FeedsFragment.FEED_TYPE, FragmentTypes.GENERAL.toString());
-            }
-
-            if (savedInstanceState != null && savedInstanceState.containsKey(UsersResponse.KEY)) {
-                mUsersResults = Parcels.unwrap(savedInstanceState.getParcelable(UsersResponse.KEY));
             }
         }
     }
@@ -220,8 +206,6 @@ public class FeedsFragment extends Fragment {
 
         ButterKnife.bind(this, rootView);
 
-        showLoadingBar(true);
-
         mAdapter = new FeedsRecyclerViewAdapter();
         mFeedsRecyclerView.setAdapter(mAdapter);
         mFeedsRecyclerView.setHasFixedSize(true);
@@ -245,19 +229,18 @@ public class FeedsFragment extends Fragment {
         setUpSearchAutoComplete();
         if (savedInstanceState == null) {
             loadFeeds();
+        } 
+        
+        if (savedInstanceState != null && savedInstanceState.containsKey(FeedsResponse.KEY)) {
+            mUsersResults = Parcels.unwrap(savedInstanceState.getParcelable(UsersResponse.KEY));
+            mfeedsResponse = Parcels.unwrap(savedInstanceState.getParcelable(FeedsResponse.KEY));
+            mFragmentType = Parcels.unwrap(savedInstanceState.getParcelable(FeedsFragment.FEED_TYPE));
+            mAdapter.setData(mfeedsResponse.getItems(),getUserIdFromSharedPreferences(getActivity()),mFragmentType);
+            // Restoring recycler view position
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+            mFeedsRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+            mFeedsRecyclerView.setVisibility(View.VISIBLE);
         }
-
-//        // Set the adapter
-//        if (view instanceof RecyclerView) {
-//            Context context = view.getContext();
-//            RecyclerView recyclerView = (RecyclerView) view;
-//            if (mCustomerId <= 1) {
-//                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-//            } else {
-//                recyclerView.setLayoutManager(new GridLayoutManager(context, mCustomerId));
-//            }
-//            recyclerView.setAdapter(new FeedsRecyclerViewAdapter());
-//        }
         hideKeyboard(getActivity());
         return rootView;
     }
@@ -267,6 +250,7 @@ public class FeedsFragment extends Fragment {
             return;
         }
         if (isThereInternetConnection(getActivity())) {
+            showLoadingBar(true);
             Observable<FeedsResponse> responseObservable = getApiService().getFeeds(mCustomerId);
             if(mFragmentType.equals(FragmentTypes.GENERAL.toString())) {
                 responseObservable = getApiService().getFeeds(mCustomerId);
@@ -340,6 +324,10 @@ public class FeedsFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
         // Save outState
+        mListState = mLayoutManager.onSaveInstanceState();
+        outState.putParcelable(LIST_STATE_KEY, mListState);
         outState.putParcelable(UsersResponse.KEY, Parcels.wrap(mUsersResults));
+        outState.putParcelable(FeedsResponse.KEY, Parcels.wrap(mfeedsResponse));
+        outState.putParcelable(FeedsFragment.FEED_TYPE, Parcels.wrap(mFragmentType));
     }
 }
