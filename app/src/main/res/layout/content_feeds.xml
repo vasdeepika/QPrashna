@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".ui.feeds.FeedsActivity"
+    tools:context=".ui.feeds.MainActivity"
     tools:showIn="@layout/app_bar_feeds">
 
     <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/feeds_fragment"
+        android:id="@+id/qprashna_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerInside"/>

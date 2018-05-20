@@ -13,8 +13,6 @@ import android.widget.TextView;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.Item;
-import com.android.qprashna.ui.feeds.FeedsFragment.OnListFragmentInteractionListener;
-import com.android.qprashna.ui.feeds.dummy.DummyContent.DummyItem;
 
 import java.util.List;
 
@@ -31,11 +29,6 @@ import static com.android.qprashna.ui.common.ViewUtils.getJSessionIdInSharedPref
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
 import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
 public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecyclerViewAdapter.CardViewHolder> {
 
     private List<Item> mFeedsItems;
@@ -60,6 +53,7 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
         Item feedItem = mFeedsItems.get(position);
         String answeredBy = String.format(mContext.getResources().getString(R.string.answered_by_text), feedItem.getFeedQuestionAskedTOName(), feedItem.getFeedQuestionAskedByName());
         String askedBy = String.format(mContext.getResources().getString(R.string.asked_by_text),feedItem.getFeedQuestionAskedByName(), feedItem.getFeedQuestionAskedTOName());
+        String postedBy = String.format(mContext.getResources().getString(R.string.posted_by_text), feedItem.getFeedPostBy());
         if(mFragmentType.equals(FragmentTypes.QUESTIONS_ANSWERED.toString())) {
             holder.askedBy.setText(answeredBy);
             holder.upVote.setVisibility(View.GONE);
@@ -69,10 +63,26 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
             holder.feedTitle.setTypeface(null, Typeface.BOLD);
             holder.timeAgo.setVisibility(View.GONE);
         } else {
-            holder.askedBy.setText(askedBy);
             holder.feedTitle.setText(feedItem.getFeedTitle());
             holder.timeAgo.setText(feedItem.getTimeAgo());
-            holder.feedQuestion.setText(feedItem.getFeedQuestionText());
+            if (feedItem.getFeedType().equals("P")) {
+                holder.feedQuestion.setText(feedItem.getFeedPostText());
+                holder.askedBy.setText(postedBy);
+            } else {
+                holder.feedQuestion.setText(feedItem.getFeedQuestionText());
+                holder.askedBy.setText(askedBy);
+            }
+        }
+
+        if(feedItem.getFeedAnswerText()!=null && !mFragmentType.equals(FragmentTypes.QUESTIONS_ANSWERED.toString())) {
+            String qtnAndAnswertext = String.format(mContext.getResources().getString(R.string.qtn_and_answer_text), feedItem.getFeedQuestionText(), feedItem.getFeedAnswerText());
+            holder.feedQuestion.setText(qtnAndAnswertext);
+            holder.askedBy.setText(answeredBy);
+        }
+
+        if(mFragmentType.equals(FragmentTypes.QUESTIONS_UPVOTED.toString()) || mFragmentType.equals(FragmentTypes.QESTIONS_ASKED_BY_ME.toString()) || mFragmentType.equals(FragmentTypes.QUESTIONS_UNANSWERED.toString())) {
+            holder.timeAgo.setVisibility(View.GONE);
+            holder.feedTitle.setVisibility(View.GONE);
         }
 
         int upVoteCount = 0;
@@ -185,6 +195,5 @@ public class FeedsRecyclerViewAdapter extends RecyclerView.Adapter<FeedsRecycler
             super(cardView);
             ButterKnife.bind(this, cardView);
         }
-
     }
 }

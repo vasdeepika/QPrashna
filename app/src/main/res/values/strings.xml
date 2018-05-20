@@ -20,6 +20,10 @@
     <string name="network_error">Network is not available.  Please check your network connection and try again…</string>
     <string name="try_again_text">Something went wrong.  Please try again.</string>
     <string name="title_activity_feeds">Feeds</string>
+    <string name="title_activity_qtns_asked_by_me">My Questions</string>
+    <string name="title_activity_qtns_answered_by_me">My Answered Questions</string>
+    <string name="title_activity_qtns_my_upvoted_qtns">My Up voted Questions</string>
+    <string name="title_activity_qtns_un_answered_by_me">My Unanswered Questions</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
@@ -38,6 +42,8 @@
     <string name="search_for_person_text">Search for person…</string>
     <string name="asked_by_text">Asked By %s to %s</string>
     <string name="answered_by_text">Answered By %s for %s</string>
+    <string name="posted_by_text">Posted By %s</string>
+    <string name="qtn_and_answer_text">%s\nAnswer: %s</string>
     <string name="up_voted">Upvoted</string>
     <string name="up_vote">UpVote</string>
     <string name="up_votes">%s UpVotes</string>
@@ -49,4 +55,24 @@
     <string name="profile_user_name">%s\n%s</string>
     <string name="remove_success_text">Success</string>
     <string name="ask_qtn">Ask Question</string>
+    <string name="title_following">People I follow</string>
+    <string name="title_followers">My Followers</string>
+    <string name="title_edit_profiile">Edit Profile</string>
+    <string name="title_change_password">Change Password</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="designation_text">Designation</string>
+    <string name="gender_text">Gender</string>
+    <string name="choose_designation">Select Designation</string>
+    <string name="select_gender">Select Gender</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="state_text">State</string>
+    <string name="designation">Designation</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="gender">Gender</string>
+    <string name="country">Country</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="profile_updated_text">Profile is updated successfully</string>
+    <string name="password_updated_successfully">Password is updated successfully</string>
 </resources>

@@ -70,7 +70,7 @@ public class Item {
     private String postLiked;
     @SerializedName("upvoted")
     @Expose
-    private boolean upvoted;
+    private String upvoted;
     @SerializedName("isBookMarked")
     @Expose
     private Boolean isBookMarked;
@@ -289,10 +289,10 @@ public class Item {
     }
 
     public boolean getUpvoted() {
-        return upvoted;
+        return Boolean.valueOf(upvoted);
     }
 
-    public void setUpvoted(boolean upvoted) {
+    public void setUpvoted(String upvoted) {
         this.upvoted = upvoted;
     }
 

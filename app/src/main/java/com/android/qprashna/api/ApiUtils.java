@@ -75,6 +75,33 @@ public class ApiUtils {
         return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
     }
 
+    public static RequestBody updateProfileRequestBody(int id, String firstName, String lastName, String gender, String designation, String state, String country, String dob, String email) {
+        Map<String, Object> jsonParams = new ArrayMap<>();
+
+        jsonParams.put("id",id);
+        jsonParams.put("firstName",firstName);
+        jsonParams.put("lastName", lastName);
+        jsonParams.put("gender", gender);
+        jsonParams.put("designation", designation);
+        jsonParams.put("country", country);
+        jsonParams.put("state", state);
+        jsonParams.put("dateOfBirth", dob);
+        jsonParams.put("email", email);
+
+        return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
+    }
+
+    public static RequestBody updatePasswordRequestBody(int userIdFromSharedPreferences, String currentPassword, String newPassword) {
+        Map<String, Object> jsonParams = new ArrayMap<>();
+
+        jsonParams.put("userId",userIdFromSharedPreferences);
+        jsonParams.put("oldPassword",currentPassword);
+        jsonParams.put("newPassword", newPassword);
+
+        return RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),(new JSONObject(jsonParams)).toString());
+
+    }
+
     public static String getErrorMessage(String errorResponse) {
         try {
             JSONObject jsonObject = new JSONObject(errorResponse);

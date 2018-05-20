@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.android.qprashna.R;
 import com.android.qprashna.api.AskQuestionResponse;
 import com.android.qprashna.api.FollowUserResponse;
+import com.android.qprashna.api.ProfileDataObject;
 import com.android.qprashna.api.RemoveFolloweeResponse;
 import com.android.qprashna.api.UserResult;
 import com.squareup.picasso.Picasso;
@@ -38,7 +39,7 @@ import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
 public class ProfileViewActivity extends AppCompatActivity {
 
-    UserResult mUserResult;
+    ProfileDataObject mProfileDataObject;
     private DisposableObserver mDisposable;
     boolean isFollowing;
 
@@ -68,14 +69,14 @@ public class ProfileViewActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null && bundle.containsKey(UserResult.PROFILE)) {
-            mUserResult = Parcels.unwrap(
+            mProfileDataObject = Parcels.unwrap(
                     bundle.getParcelable(UserResult.PROFILE));
 
-            name.setText(String.format(getString(R.string.profile_user_name), mUserResult.getFirstName(), mUserResult.getLastName()).replaceAll("\\s+", System.getProperty("line.separator")));
+            name.setText(String.format(getString(R.string.profile_user_name), mProfileDataObject.getFirstName(), mProfileDataObject.getLastName()).replaceAll("\\s+", System.getProperty("line.separator")));
 
             ImageView profileImage = findViewById(R.id.profile_image);
             Picasso.with(this)
-                    .load("https://qprashna.com/images/" + mUserResult.getProfilePicURL())
+                    .load("https://qprashna.com/images/" + mProfileDataObject.getProfilePicURL())
                     .placeholder(R.drawable.placeholder)
                     .resize(450, 400)
                     .into(profileImage);
@@ -89,7 +90,7 @@ public class ProfileViewActivity extends AppCompatActivity {
         askBtn.setOnClickListener(v -> {
             if (question.getText().length() > 0) {
                 if (isThereInternetConnection(ProfileViewActivity.this)) {
-                    Observable<AskQuestionResponse> askQuestionResponseObservable = getApiService().askQuestion(getJSessionIdInSharedPreferences(ProfileViewActivity.this), askQuestionRequestBody(getUserIdFromSharedPreferences(ProfileViewActivity.this), mUserResult.getId(), question.getText().toString()));
+                    Observable<AskQuestionResponse> askQuestionResponseObservable = getApiService().askQuestion(getJSessionIdInSharedPreferences(ProfileViewActivity.this), askQuestionRequestBody(getUserIdFromSharedPreferences(ProfileViewActivity.this), mProfileDataObject.getUserId(), question.getText().toString()));
                     mDisposable = askQuestionResponseObservable
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -121,7 +122,7 @@ public class ProfileViewActivity extends AppCompatActivity {
 
     public void isUserFollowing() {
         if (isThereInternetConnection(this)) {
-            Observable<String> isFollowingResponseObservable = getApiService().isFollowing(isFollowingRequestBody(getUserIdFromSharedPreferences(this), mUserResult.getId()));
+            Observable<String> isFollowingResponseObservable = getApiService().isFollowing(isFollowingRequestBody(getUserIdFromSharedPreferences(this), mProfileDataObject.getUserId()));
             mDisposable = isFollowingResponseObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -171,7 +172,7 @@ public class ProfileViewActivity extends AppCompatActivity {
 
     private void unFollowUser() {
         if (isThereInternetConnection(this)) {
-            Observable<RemoveFolloweeResponse> isFollowingResponseObservable = getApiService().unFollowUser(getJSessionIdInSharedPreferences(this), getFollowUserRequestBody(getUserIdFromSharedPreferences(this), mUserResult.getId()));
+            Observable<RemoveFolloweeResponse> isFollowingResponseObservable = getApiService().unFollowUser(getJSessionIdInSharedPreferences(this), getFollowUserRequestBody(getUserIdFromSharedPreferences(this), mProfileDataObject.getUserId()));
             mDisposable = isFollowingResponseObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -202,7 +203,7 @@ public class ProfileViewActivity extends AppCompatActivity {
 
     private void followUser() {
         if (isThereInternetConnection(this)) {
-            Observable<FollowUserResponse> isFollowingResponseObservable = getApiService().followUser(getJSessionIdInSharedPreferences(this), getFollowUserRequestBody(getUserIdFromSharedPreferences(this), mUserResult.getId()));
+            Observable<FollowUserResponse> isFollowingResponseObservable = getApiService().followUser(getJSessionIdInSharedPreferences(this), getFollowUserRequestBody(getUserIdFromSharedPreferences(this), mProfileDataObject.getUserId()));
             mDisposable = isFollowingResponseObservable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

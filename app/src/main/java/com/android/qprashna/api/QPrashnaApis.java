@@ -26,13 +26,13 @@ public interface QPrashnaApis {
     Observable<FeedsResponse> getAnsweredByMe(@Path("id") int id);
 
     @GET("questions/yettoanswer/{id}/0/20") // Get UnAnswered by user
-    Observable<FeedsResponse> getUnAnsweredByMe(@Path("id") int id);
+    Observable<FeedsResponse> getUnAnsweredByMe(@Header("Cookie") String sessionId, @Path("id") int id);
 
     @GET("questions/upvotedby/{id}/0/20") // Get my up voted questions
-    Observable<FeedsResponse> getMyUpVotedQuestions(@Path("id") int id);
+    Observable<FeedsResponse> getMyUpVotedQuestions(@Header("Cookie") String sessionId, @Path("id") int id);
 
     @GET("questions/askedby/{id}/0/20") // Get asked by user
-    Observable<FeedsResponse> getQuestionsAskedByMe(@Path("id") int id);
+    Observable<FeedsResponse> getQuestionsAskedByMe(@Header("Cookie") String sessionId, @Path("id") int id);
 
     @PUT("{id}/question/upvote/{questionId}") // Put upVote or unUpVote count
     Observable<Integer> putUpVote(@Header("Cookie") String sessionId, @Path("id") int id, @Path("questionId") int questionId, @Query("action") String action, @Query("feedId") int feedId);
@@ -51,4 +51,16 @@ public interface QPrashnaApis {
 
     @POST("question/post/") // Add follower
     Observable<AskQuestionResponse> askQuestion(@Header("Cookie") String sessionId, @Body RequestBody askQuestionRequestBody);
+
+    @GET("follower/list/{id}/0/20") // Followers list
+    Observable<FollowersResponse> getFollowers(@Header("Cookie") String sessionId,@Path("id") int id);
+
+    @GET("followee/list/{id}/0/20") // Followers list
+    Observable<FollowersResponse> getFollowees(@Header("Cookie") String sessionId,@Path("id") int id);
+
+    @POST("user/update") // update profile
+    Observable<LoginResponse> updateProfile(@Header("Cookie") String sessionId, @Body RequestBody updateProfileRequestBody);
+
+    @POST("changepassword") // update profile
+    Observable<ChangePasswordResponse> updatePassword(@Header("Cookie") String sessionId, @Body RequestBody updatePasswordRequestBody);
 }

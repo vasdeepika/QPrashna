@@ -25,7 +25,7 @@ import android.widget.Toast;
 import com.android.qprashna.R;
 import com.android.qprashna.api.LoginResponse;
 import com.android.qprashna.ui.common.TranslucentProgressBar;
-import com.android.qprashna.ui.feeds.FeedsActivity;
+import com.android.qprashna.ui.feeds.MainActivity;
 
 import org.parceler.Parcels;
 
@@ -90,22 +90,24 @@ public class SignInOrCreateAccountFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_sign_in_create_account, container, false);
 
         ButterKnife.bind(this, rootView);
-        mViewPager = getActivity().findViewById(R.id.viewPager);
-        mProgressBar = TranslucentProgressBar.getInstance();
+        if (getActivity() != null) {
+            mViewPager = getActivity().findViewById(R.id.viewPager);
+            mProgressBar = TranslucentProgressBar.getInstance();
 
-        if (isNewUser()) {
-            if (firstNameLayout.getVisibility() != View.VISIBLE)
-                firstNameLayout.setVisibility(View.VISIBLE);
-            if (lastNameLayout.getVisibility() != View.VISIBLE)
-                lastNameLayout.setVisibility(View.VISIBLE);
-            if (emailAddressLayout.getVisibility() != View.VISIBLE)
-                emailAddressLayout.setVisibility(View.VISIBLE);
-            loginButton.setText(getResources().getString(R.string.sign_up_text));
+            if (isNewUser()) {
+                if (firstNameLayout.getVisibility() != View.VISIBLE)
+                    firstNameLayout.setVisibility(View.VISIBLE);
+                if (lastNameLayout.getVisibility() != View.VISIBLE)
+                    lastNameLayout.setVisibility(View.VISIBLE);
+                if (emailAddressLayout.getVisibility() != View.VISIBLE)
+                    emailAddressLayout.setVisibility(View.VISIBLE);
+                loginButton.setText(getResources().getString(R.string.sign_up_text));
+            }
+            setNotRegisteredSpannableString();
+            setLoginButtonOnClickListener();
+            setRXJavaErrorHandling();
+            hideKeyboard(getActivity());
         }
-        setNotRegisteredSpannableString();
-        setLoginButtonOnClickListener();
-        setRXJavaErrorHandling();
-        hideKeyboard(getActivity());
         return rootView;
     }
 
@@ -139,14 +141,15 @@ public class SignInOrCreateAccountFragment extends Fragment {
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View textView) {
-                if (isNewUser() && mViewPager.getAdapter()!=null) {
+                if (isNewUser() && mViewPager.getAdapter() != null) {
                     mViewPager.getAdapter().notifyDataSetChanged();
                     mViewPager.setCurrentItem(0);
-                } else if (mViewPager.getAdapter()!=null){
+                } else if (mViewPager.getAdapter() != null) {
                     mViewPager.getAdapter().notifyDataSetChanged();
                     mViewPager.setCurrentItem(1);
                 }
             }
+
             @Override
             public void updateDrawState(TextPaint ds) {
                 super.updateDrawState(ds);
@@ -164,24 +167,23 @@ public class SignInOrCreateAccountFragment extends Fragment {
     private void setLoginButtonOnClickListener() {
         loginButton.setOnClickListener(view -> {
             mProgressBar.showProgress(getContext());
-            if(isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.sign_up_text))) {
+            if (isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.sign_up_text))) {
                 createAccountCall(userNameEntry.getText().toString(),
                         passwordEntry.getText().toString(),
                         firstNameLayout.getEditText().getText().toString(),
                         lastNameLayout.getEditText().getText().toString(),
                         emailAddressLayout.getEditText().getText().toString());
-            } else if (!isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.login_text))){
+            } else if (!isNewUser() && loginButton.getText().toString().equals(getResources().getString(R.string.login_text))) {
                 loginCall(userNameEntry.getText().toString(), passwordEntry.getText().toString());
             }
-
         });
     }
 
     private void createAccountCall(String userName, String password, String firstName, String lastName, String emailAddress) {
-        if (getActivity() == null){
+        if (getActivity() == null) {
             return;
         }
-        if(isThereInternetConnection(getActivity())) {
+        if (isThereInternetConnection(getActivity())) {
             Observable<Response<LoginResponse>> loginResponseObservable = getApiService().createAccount(getCreateAccountRequestBody(userName, password, firstName, lastName, emailAddress));
             mDisposable = loginResponseObservable
                     .subscribeOn(Schedulers.io())
@@ -189,11 +191,11 @@ public class SignInOrCreateAccountFragment extends Fragment {
                     .subscribeWith(new DisposableObserver<Response<LoginResponse>>() {
                         @Override
                         public void onNext(Response<LoginResponse> loginResponse) {
-                            String jSessionId = loginResponse.headers().get("Set-Cookie").split(";",2)[0];
+                            String jSessionId = loginResponse.headers().get("Set-Cookie").split(";", 2)[0];
                             storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
                             mProgressBar.unShowProgress();
                             if (loginResponse.body() != null) {
-                                mLoginResponse =  loginResponse.body();
+                                mLoginResponse = loginResponse.body();
                                 saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
                                 launchFeedsActivity();
                             }
@@ -216,7 +218,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
 
     private void launchFeedsActivity() {
         Intent feedsActivityIntent =
-                new Intent(getContext(), FeedsActivity.class);
+                new Intent(getContext(), MainActivity.class);
         feedsActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Bundle bundle = new Bundle();
         bundle.putParcelable(LoginResponse.KEY, Parcels.wrap(mLoginResponse));
@@ -226,10 +228,10 @@ public class SignInOrCreateAccountFragment extends Fragment {
     }
 
     private void loginCall(String userName, String password) {
-        if (getActivity() == null){
-           return;
+        if (getActivity() == null) {
+            return;
         }
-        if(isThereInternetConnection(getActivity())) {
+        if (isThereInternetConnection(getActivity())) {
             Observable<Response<LoginResponse>> loginResponseObservable = getApiService().login(getLoginRequestBody(userName, password));
             mDisposable = loginResponseObservable
                     .subscribeOn(Schedulers.io())
@@ -238,23 +240,15 @@ public class SignInOrCreateAccountFragment extends Fragment {
 
                         @Override
                         public void onNext(Response<LoginResponse> loginResponseResponse) {
-                            String jSessionId = loginResponseResponse.headers().get("Set-Cookie").split(";",2)[0];
-                            storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
-//                            for (int i=0; i < headers.length; i++)
-//                            {
-//                                Header h = headers[i];
-//                                String s1 = h.getName();
-//                                if(s1.equals("Set-Cookie"))
-//                                {
-//                                    sessionCookieValue = h.getValue().split(";",2)[0];
-//                                    return;
-//                                }
-//                            }
                             mProgressBar.unShowProgress();
-                            if (loginResponseResponse.body() != null) {
-                                mLoginResponse = loginResponseResponse.body();
-                                saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
-                                launchFeedsActivity();
+                            if (loginResponseResponse != null) {
+                                String jSessionId = loginResponseResponse.headers().get("Set-Cookie").split(";", 2)[0];
+                                storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
+                                if (loginResponseResponse.body() != null) {
+                                    mLoginResponse = loginResponseResponse.body();
+                                    saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
+                                    launchFeedsActivity();
+                                }
                             }
                         }
 
@@ -262,7 +256,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
                         public void onError(Throwable e) {
                             // show error message if api call throws an error
                             mProgressBar.unShowProgress();
-                            showErrorMessage(getActivity(),e);
+                            showErrorMessage(getActivity(), e);
                         }
 
                         @Override
@@ -270,6 +264,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
 
                         }
                     });
+
         }
     }
 

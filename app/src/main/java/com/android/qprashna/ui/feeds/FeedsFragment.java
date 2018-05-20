@@ -20,10 +20,10 @@ import android.widget.ProgressBar;
 
 import com.android.qprashna.R;
 import com.android.qprashna.api.FeedsResponse;
+import com.android.qprashna.api.ProfileDataObject;
 import com.android.qprashna.api.UserResult;
 import com.android.qprashna.api.UsersResponse;
 import com.android.qprashna.ui.ProfileViewActivity;
-import com.android.qprashna.ui.feeds.dummy.DummyContent.DummyItem;
 
 import org.parceler.Parcels;
 
@@ -39,6 +39,7 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.android.qprashna.api.ApiUtils.getApiService;
+import static com.android.qprashna.ui.common.ViewUtils.getJSessionIdInSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.getUserIdFromSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.hideKeyboard;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
@@ -92,14 +93,16 @@ public class FeedsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mCustomerId = getUserIdFromSharedPreferences(getActivity());
+        if(getActivity() !=null) {
+            mCustomerId = getUserIdFromSharedPreferences(getActivity());
 
-        if (getArguments() != null) {
-            mFragmentType = getArguments().getString(FeedsFragment.FEED_TYPE, FragmentTypes.GENERAL.toString());
-        }
+            if (getArguments() != null) {
+                mFragmentType = getArguments().getString(FeedsFragment.FEED_TYPE, FragmentTypes.GENERAL.toString());
+            }
 
-        if(savedInstanceState != null && savedInstanceState.containsKey(UsersResponse.KEY)) {
-            mUsersResults = Parcels.unwrap(savedInstanceState.getParcelable(UsersResponse.KEY));
+            if (savedInstanceState != null && savedInstanceState.containsKey(UsersResponse.KEY)) {
+                mUsersResults = Parcels.unwrap(savedInstanceState.getParcelable(UsersResponse.KEY));
+            }
         }
     }
 
@@ -183,10 +186,17 @@ public class FeedsFragment extends Fragment {
                 mUsersAdapter.clear();
                 mUsersAdapter.notifyDataSetChanged();
 
+                UserResult userResult = mUsersResults.get(position);
+                ProfileDataObject profileDataObject = new ProfileDataObject();
+                profileDataObject.setFirstName(userResult.getFirstName());
+                profileDataObject.setLastName(userResult.getLastName());
+                profileDataObject.setProfilePicURL(userResult.getProfilePicURL());
+                profileDataObject.setUserId(userResult.getId());
+
                 Intent profileViewActivityIntent =
                         new Intent(getContext(), ProfileViewActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putParcelable(UserResult.PROFILE, Parcels.wrap(mUsersResults.get(position)));
+                bundle.putParcelable(UserResult.PROFILE, Parcels.wrap(profileDataObject));
                 profileViewActivityIntent.putExtras(bundle);
                 startActivity(profileViewActivityIntent);
             }
@@ -263,11 +273,11 @@ public class FeedsFragment extends Fragment {
             } else if(mFragmentType.equals(FragmentTypes.QUESTIONS_ANSWERED.toString())) {
                 responseObservable = getApiService().getAnsweredByMe(mCustomerId);
             } else if(mFragmentType.equals(FragmentTypes.QUESTIONS_UNANSWERED.toString())) {
-                responseObservable = getApiService().getUnAnsweredByMe(mCustomerId);
+                responseObservable = getApiService().getUnAnsweredByMe(getJSessionIdInSharedPreferences(getActivity()), mCustomerId);
             } else if(mFragmentType.equals(FragmentTypes.QESTIONS_ASKED_BY_ME.toString())) {
-                responseObservable = getApiService().getQuestionsAskedByMe(mCustomerId);
+                responseObservable = getApiService().getQuestionsAskedByMe(getJSessionIdInSharedPreferences(getActivity()), mCustomerId);
             } else if(mFragmentType.equals(FragmentTypes.QUESTIONS_UPVOTED.toString())) {
-                responseObservable = getApiService().getMyUpVotedQuestions(mCustomerId);
+                responseObservable = getApiService().getMyUpVotedQuestions(getJSessionIdInSharedPreferences(getActivity()), mCustomerId);
             }
             mDisposable = responseObservable
                     .subscribeOn(Schedulers.io())
@@ -315,21 +325,6 @@ public class FeedsFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
     }
 
     @Override
