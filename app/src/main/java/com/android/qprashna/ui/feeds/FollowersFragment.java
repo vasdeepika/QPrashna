@@ -14,7 +14,12 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.android.qprashna.R;
+import com.android.qprashna.api.FollowerItem;
 import com.android.qprashna.api.FollowersResponse;
+import com.android.qprashna.api.ProfileDataObject;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
 import org.parceler.Parcels;
 
@@ -30,6 +35,7 @@ import static com.android.qprashna.api.ApiUtils.getApiService;
 import static com.android.qprashna.ui.common.ViewUtils.getJSessionIdInSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.getUserIdFromSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
+import static com.android.qprashna.ui.common.ViewUtils.launchProfileViewActivity;
 import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
 /**
@@ -37,7 +43,7 @@ import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
  * <p/>
  * interface.
  */
-public class FollowersFragment extends Fragment {
+public class FollowersFragment extends Fragment implements MyFollowerItemRecyclerViewAdapter.FollowerItemClickListener {
 
     private FollowersResponse mFollowersResponse;
     private int mCustomerId;
@@ -57,6 +63,9 @@ public class FollowersFragment extends Fragment {
     @BindView(R.id.followers_list)
     RecyclerView mFollowersRecyclerView;
     private Parcelable mListState;
+    private InterstitialAd mInterstitialAd;
+    private ProfileDataObject mProfileDataObject;
+    private FollowerItem mFollowerItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -85,7 +94,8 @@ public class FollowersFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_followers_list, container, false);
         ButterKnife.bind(this, view);
 
-        mAdapter = new MyFollowerItemRecyclerViewAdapter();
+        loadInterstitialAd();
+        mAdapter = new MyFollowerItemRecyclerViewAdapter(this);
         mFollowersRecyclerView.setAdapter(mAdapter);
         mFollowersRecyclerView.setHasFixedSize(true);
         // setting recipe columns depends on screen size
@@ -191,5 +201,49 @@ public class FollowersFragment extends Fragment {
         outState.putParcelable(FollowersResponse.KEY, Parcels.wrap(mFollowersResponse));
         outState.putParcelable(FollowersFragment.FRAGMENT_TYPE, Parcels.wrap(mFragmentType));
         outState.putParcelable(FeedsFragment.FEED_TYPE, Parcels.wrap(mFragmentType));
+    }
+
+    public void loadInterstitialAd() {
+        mInterstitialAd = new InterstitialAd(getActivity());
+        mInterstitialAd.setAdUnitId(getActivity().getResources().getString(R.string.adunitId));
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                launchProfileActivity();
+            }
+        });
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+
+        mInterstitialAd.loadAd(adRequest);
+    }
+
+    @Override
+    public void onFollowerItemClicked(FollowerItem followerItem) {
+        mFollowerItem = followerItem;
+        if (mInterstitialAd != null && mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else {
+            launchProfileActivity();
+        }
+    }
+
+    private void launchProfileActivity() {
+        if (mAdapter != null) {
+            String fragmentType = mAdapter.getFragmentType();
+            ProfileDataObject profileDataObject = new ProfileDataObject();
+            if(mFragmentType.equals(FragmentTypes.FOLLOWERS.toString())) {
+                profileDataObject.setUserId(mFollowerItem.getUserId());
+            } else if(mFragmentType.equals(FragmentTypes.FOLLOWING.toString())) {
+                profileDataObject.setUserId(mFollowerItem.getFolloweeId());
+            }
+
+            profileDataObject.setFirstName(mFollowerItem.getFirstName());
+            profileDataObject.setLastName(mFollowerItem.getFirstName());
+            profileDataObject.setProfilePicURL(mFollowerItem.getProfilePicURL());
+            launchProfileViewActivity(getActivity(), profileDataObject);
+        }
     }
 }

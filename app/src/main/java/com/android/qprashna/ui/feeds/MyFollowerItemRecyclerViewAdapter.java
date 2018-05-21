@@ -1,8 +1,6 @@
 package com.android.qprashna.ui.feeds;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +12,7 @@ import android.widget.TextView;
 import com.android.qprashna.R;
 import com.android.qprashna.api.FollowerItem;
 import com.android.qprashna.api.ProfileDataObject;
-import com.android.qprashna.api.UserResult;
-import com.android.qprashna.ui.ProfileViewActivity;
 import com.squareup.picasso.Picasso;
-
-import org.parceler.Parcels;
 
 import java.util.List;
 
@@ -31,9 +25,19 @@ public class MyFollowerItemRecyclerViewAdapter extends RecyclerView.Adapter<MyFo
     private int mCustomerId;
     private String mFragmentType;
     private Context mContext;
+    private ProfileDataObject profileDataObject;
+    final private FollowerItemClickListener mFollowerItemClickListener;
 
-    MyFollowerItemRecyclerViewAdapter() {
+    MyFollowerItemRecyclerViewAdapter(FollowerItemClickListener followerItemClickListener) {
+        mFollowerItemClickListener = followerItemClickListener;
+    }
 
+    public String getFragmentType() {
+        return mFragmentType;
+    }
+
+    public interface FollowerItemClickListener {
+        void onFollowerItemClicked(FollowerItem followerItemId);
     }
 
     @Override
@@ -55,26 +59,6 @@ public class MyFollowerItemRecyclerViewAdapter extends RecyclerView.Adapter<MyFo
 
         String name = String.format(mContext.getString(R.string.profile_user_name), followerItem.getFirstName(), followerItem.getLastName());
         holder.followerName.setText(name);
-
-        ProfileDataObject profileDataObject = new ProfileDataObject();
-        if(mFragmentType.equals(FragmentTypes.FOLLOWERS.toString())) {
-            profileDataObject.setUserId(followerItem.getUserId());
-        } else if(mFragmentType.equals(FragmentTypes.FOLLOWING.toString())) {
-            profileDataObject.setUserId(followerItem.getFolloweeId());
-        }
-
-        profileDataObject.setFirstName(followerItem.getFirstName());
-        profileDataObject.setLastName(followerItem.getFirstName());
-        profileDataObject.setProfilePicURL(followerItem.getProfilePicURL());
-
-        holder.followerLayout.setOnClickListener(v -> {
-            Intent profileViewActivityIntent =
-                    new Intent(mContext, ProfileViewActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(UserResult.PROFILE, Parcels.wrap(profileDataObject));
-            profileViewActivityIntent.putExtras(bundle);
-            mContext.startActivity(profileViewActivityIntent);
-        });
     }
 
     @Override
@@ -89,7 +73,7 @@ public class MyFollowerItemRecyclerViewAdapter extends RecyclerView.Adapter<MyFo
         notifyDataSetChanged();
     }
 
-    class FollowerCardViewHolder extends RecyclerView.ViewHolder {
+    class FollowerCardViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.follower_name)
         TextView followerName;
 
@@ -102,6 +86,12 @@ public class MyFollowerItemRecyclerViewAdapter extends RecyclerView.Adapter<MyFo
         FollowerCardViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mFollowerItemClickListener.onFollowerItemClicked(mFollowerItems.get(getAdapterPosition()));
         }
     }
 }

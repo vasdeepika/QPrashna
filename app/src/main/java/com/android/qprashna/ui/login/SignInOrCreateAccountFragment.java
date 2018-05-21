@@ -27,6 +27,8 @@ import com.android.qprashna.api.LoginResponse;
 import com.android.qprashna.data.QprashnaContract;
 import com.android.qprashna.ui.common.TranslucentProgressBar;
 
+import java.io.IOException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
@@ -39,6 +41,7 @@ import retrofit2.Response;
 
 import static com.android.qprashna.api.ApiUtils.getApiService;
 import static com.android.qprashna.api.ApiUtils.getCreateAccountRequestBody;
+import static com.android.qprashna.api.ApiUtils.getErrorMessage;
 import static com.android.qprashna.api.ApiUtils.getLoginRequestBody;
 import static com.android.qprashna.ui.common.ViewUtils.hideKeyboard;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
@@ -189,14 +192,26 @@ public class SignInOrCreateAccountFragment extends Fragment {
                     .subscribeWith(new DisposableObserver<Response<LoginResponse>>() {
                         @Override
                         public void onNext(Response<LoginResponse> loginResponse) {
-                            String jSessionId = loginResponse.headers().get("Set-Cookie").split(";", 2)[0];
-                            storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
+                            if(loginResponse.headers() != null && loginResponse.headers().get("Set-Cookie") != null) {
+                                String jSessionId = loginResponse.headers().get("Set-Cookie").split(";", 2)[0];
+                                storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
+                            }
                             mProgressBar.unShowProgress();
                             if (loginResponse.body() != null) {
                                 mLoginResponse = loginResponse.body();
-                                saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
-                                saveProfileInfo();
-                                ((SignInCreateAccountActivity)getActivity()).launchMainActivity();
+                                if (mLoginResponse.getStatus().equals(getString(R.string.verify_pending_status))) {
+                                    Toast.makeText(getActivity(), R.string.activate_account_text, Toast.LENGTH_LONG).show();
+                                } else if (mLoginResponse.getStatus().equalsIgnoreCase(getString(R.string.account_active_status))) {
+                                    saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
+                                    saveProfileInfo();
+                                    ((SignInCreateAccountActivity) getActivity()).launchMainActivity();
+                                }
+                            } else if (loginResponse.errorBody() != null) {
+                                try {
+                                    Toast.makeText(getActivity(), getErrorMessage(loginResponse.errorBody().string()), Toast.LENGTH_LONG).show();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
 
@@ -245,16 +260,28 @@ public class SignInOrCreateAccountFragment extends Fragment {
                     .subscribeWith(new DisposableObserver<Response<LoginResponse>>() {
 
                         @Override
-                        public void onNext(Response<LoginResponse> loginResponseResponse) {
+                        public void onNext(Response<LoginResponse> loginResponse) {
                             mProgressBar.unShowProgress();
-                            if (loginResponseResponse != null) {
-                                String jSessionId = loginResponseResponse.headers().get("Set-Cookie").split(";", 2)[0];
-                                storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
-                                if (loginResponseResponse.body() != null) {
-                                    mLoginResponse = loginResponseResponse.body();
-                                    saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
-                                    saveProfileInfo();
-                                    ((SignInCreateAccountActivity)getActivity()).launchMainActivity();
+                            if (loginResponse != null) {
+                                if(loginResponse.headers() != null && loginResponse.headers().get("Set-Cookie") != null) {
+                                    String jSessionId = loginResponse.headers().get("Set-Cookie").split(";", 2)[0];
+                                    storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
+                                }
+                                if (loginResponse.body() != null) {
+                                    mLoginResponse = loginResponse.body();
+                                    if (mLoginResponse.getStatus().equalsIgnoreCase(getString(R.string.verify_pending_status))) {
+                                        Toast.makeText(getActivity(), R.string.activate_account_text, Toast.LENGTH_LONG).show();
+                                    } else if (mLoginResponse.getStatus().equalsIgnoreCase(getString(R.string.account_active_status))) {
+                                        saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
+                                        saveProfileInfo();
+                                        ((SignInCreateAccountActivity) getActivity()).launchMainActivity();
+                                    }
+                                } else if (loginResponse.errorBody() != null) {
+                                    try {
+                                        Toast.makeText(getActivity(), getErrorMessage(loginResponse.errorBody().string()), Toast.LENGTH_LONG).show();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }

@@ -2,13 +2,23 @@ package com.android.qprashna.ui.common;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.qprashna.R;
+import com.android.qprashna.api.ProfileDataObject;
+import com.android.qprashna.api.UserResult;
+import com.android.qprashna.ui.ProfileViewActivity;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+
+import org.parceler.Parcels;
 
 import java.io.IOException;
 
@@ -76,5 +86,15 @@ public class ViewUtils {
     public static String getJSessionIdInSharedPreferences(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
         return prefs.getString("sessionId", "JSESSIONID=0");
+    }
+
+    public static void launchProfileViewActivity(Activity activity, ProfileDataObject profileDataObject) {
+
+        Intent profileViewActivityIntent =
+                new Intent(activity, ProfileViewActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(UserResult.PROFILE, Parcels.wrap(profileDataObject));
+        profileViewActivityIntent.putExtras(bundle);
+        activity.startActivity(profileViewActivityIntent);
     }
 }

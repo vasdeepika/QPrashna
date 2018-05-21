@@ -24,7 +24,6 @@ import com.android.qprashna.api.FeedsResponse;
 import com.android.qprashna.api.ProfileDataObject;
 import com.android.qprashna.api.UserResult;
 import com.android.qprashna.api.UsersResponse;
-import com.android.qprashna.ui.ProfileViewActivity;
 
 import org.parceler.Parcels;
 
@@ -44,6 +43,7 @@ import static com.android.qprashna.ui.common.ViewUtils.getJSessionIdInSharedPref
 import static com.android.qprashna.ui.common.ViewUtils.getUserIdFromSharedPreferences;
 import static com.android.qprashna.ui.common.ViewUtils.hideKeyboard;
 import static com.android.qprashna.ui.common.ViewUtils.isThereInternetConnection;
+import static com.android.qprashna.ui.common.ViewUtils.launchProfileViewActivity;
 import static com.android.qprashna.ui.common.ViewUtils.showErrorMessage;
 
 
@@ -178,13 +178,7 @@ public class FeedsFragment extends Fragment {
                 profileDataObject.setLastName(userResult.getLastName());
                 profileDataObject.setProfilePicURL(userResult.getProfilePicURL());
                 profileDataObject.setUserId(userResult.getId());
-
-                Intent profileViewActivityIntent =
-                        new Intent(getContext(), ProfileViewActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(UserResult.PROFILE, Parcels.wrap(profileDataObject));
-                profileViewActivityIntent.putExtras(bundle);
-                startActivity(profileViewActivityIntent);
+                launchProfileViewActivity(getActivity(), profileDataObject);
             }
         });
     }

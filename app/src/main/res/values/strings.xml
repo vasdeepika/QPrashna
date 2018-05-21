@@ -2,10 +2,6 @@
     <string name="app_name">QPrashna</string>
     <string name="user_name_hint_text">UserName</string>
     <string name="password_hint_text">Password</string>
-    <string name="sign_in_with_facebook_button_text">Sign in with Facebook</string>
-    <string name="facebook_app_id">[APP_ID]</string>
-    <string name="fb_login_protocol_scheme">fb[APP_ID]</string>
-    <string name="or_text">or</string>
     <string name="login_text">Login</string>
     <string name="not_registered_signup_now">Not registered? Sign up Now!</string>
     <string name="sign_up_text">Sign Up</string>
@@ -78,4 +74,8 @@
     <string name="appwidget_text">Recent Question</string>
     <string name="add_widget">Add widget</string>
     <string name="widget_empty_string">You haven\'t asked any questions yet!</string>
+    <string name="activate_account_text">Your account is not verified yet. Please click on the activation link sent to your registered mail.</string>
+    <string name="verify_pending_status">Verify_Pending</string>
+    <string name="account_active_status">active</string>
+    <string name="adunitId">ca-app-pub-3940256099942544/1033173712</string>
 </resources>
