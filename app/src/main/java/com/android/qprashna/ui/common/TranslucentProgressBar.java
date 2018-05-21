@@ -40,7 +40,7 @@ public class TranslucentProgressBar {
     }
 
     public void unShowProgress() {
-        if(pd.isShowing()) {
+        if (pd != null && pd.isShowing()) {
             pd.cancel();
         }
     }

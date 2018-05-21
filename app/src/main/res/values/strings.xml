@@ -75,4 +75,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="profile_updated_text">Profile is updated successfully</string>
     <string name="password_updated_successfully">Password is updated successfully</string>
+    <string name="appwidget_text">Recent Question</string>
+    <string name="add_widget">Add widget</string>
+    <string name="widget_empty_string">You haven\'t asked any questions yet!</string>
 </resources>

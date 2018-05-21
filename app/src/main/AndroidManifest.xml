@@ -62,7 +62,21 @@
         <provider
             android:name=".data.QprashnaContentProvider"
             android:authorities="com.android.qprashna"
-            android:exported="true"/>
+            android:exported="false" />
+
+        <receiver android:name=".ui.widget.QprashnaAppWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/qprashna_app_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".ui.widget.WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
     </application>
 
 </manifest>
