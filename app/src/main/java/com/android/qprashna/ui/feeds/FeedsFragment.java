@@ -273,7 +273,8 @@ public class FeedsFragment extends Fragment {
                             if (feedsResponse != null) {
                                 mfeedsResponse = feedsResponse;
                                 mAdapter.setData(mfeedsResponse.getItems(), mCustomerId, mFragmentType);
-                                mFeedsRecyclerView.setVisibility(View.VISIBLE);                            }
+                                mFeedsRecyclerView.setVisibility(View.VISIBLE);
+                            }
                         }
 
                         @Override

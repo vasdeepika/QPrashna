@@ -186,22 +186,26 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
         } else if (navDrawerSelectedItemId == R.id.nav_edit_profile) {
-            mToolbar.setTitle(R.string.title_edit_profiile);
-            EditProfileFragment editProfileFragment = new EditProfileFragment();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.qprashna_fragment, editProfileFragment, QPRASHNA_FRAGMENT)
-                    .commit();
+            if (!navigationView.getMenu().getItem(7).getSubMenu().getItem(0).isChecked()) {
+                mToolbar.setTitle(R.string.title_edit_profiile);
+                EditProfileFragment editProfileFragment = new EditProfileFragment();
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.qprashna_fragment, editProfileFragment, QPRASHNA_FRAGMENT)
+                        .commit();
+            }
 
         } else if (navDrawerSelectedItemId == R.id.nav_change_password) {
-            mToolbar.setTitle(R.string.title_change_password);
-            ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
-            Bundle fragmentBundle = new Bundle();
-            changePasswordFragment.setArguments(fragmentBundle);
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.qprashna_fragment, changePasswordFragment, QPRASHNA_FRAGMENT)
-                    .commit();
+            if (!navigationView.getMenu().getItem(7).getSubMenu().getItem(1).isChecked()) {
+                mToolbar.setTitle(R.string.title_change_password);
+                ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
+                Bundle fragmentBundle = new Bundle();
+                changePasswordFragment.setArguments(fragmentBundle);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.qprashna_fragment, changePasswordFragment, QPRASHNA_FRAGMENT)
+                        .commit();
+            }
         } else if (navDrawerSelectedItemId == R.id.nav_sign_out) {
             if (!navigationView.getMenu().getItem(8).isChecked()) {
 
@@ -223,7 +227,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void deleteProfileData() {
-        getContentResolver().delete(QprashnaContract.ProfileEntry.CONTENT_URI,null,null);
+        getContentResolver().delete(QprashnaContract.ProfileEntry.CONTENT_URI, null, null);
     }
 
     public void clearSearchText(View view) {
