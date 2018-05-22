@@ -98,7 +98,7 @@ public class ProfileViewActivity extends AppCompatActivity {
                                 @Override
                                 public void onNext(AskQuestionResponse askQuestionResponse) {
                                     if (askQuestionResponse != null && askQuestionResponse.getFeedQuestionText().equals(question.getText().toString())) {
-                                        Toast.makeText(getBaseContext(), "Your question submitted successfully!", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getBaseContext(), R.string.question_submit_text, Toast.LENGTH_LONG).show();
                                         question.setText("");
                                     }
                                 }
