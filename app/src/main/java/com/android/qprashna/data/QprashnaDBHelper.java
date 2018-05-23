@@ -19,16 +19,16 @@ public class QprashnaDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         final String CREATE_PROFILE_TABLE = "CREATE TABLE "  + QprashnaContract.ProfileEntry.TABLE_NAME + " (" +
-                QprashnaContract.ProfileEntry.DESIGNATION + " TEXT NOT NULL, " +
+                QprashnaContract.ProfileEntry.DESIGNATION + " TEXT, " +
                 QprashnaContract.ProfileEntry.FIRSTNAME + " TEXT NOT NULL, " +
                 QprashnaContract.ProfileEntry.LASTNAME + " TEXT NOT NULL, " +
                 QprashnaContract.ProfileEntry.EMAIL + " TEXT NOT NULL, " +
-                QprashnaContract.ProfileEntry.GENDER + " TEXT NOT NULL, " +
+                QprashnaContract.ProfileEntry.GENDER + " TEXT, " +
                 QprashnaContract.ProfileEntry.USERID + " INTEGER NOT NULL, " +
-                QprashnaContract.ProfileEntry.PROFILEPIC + " TEXT NOT NULL, " +
+                QprashnaContract.ProfileEntry.PROFILEPIC + " TEXT, " +
                 QprashnaContract.ProfileEntry.DOB + " BIGINT, " +
-                QprashnaContract.ProfileEntry.COUNTRY + " TEXT NOT NULL, " +
-                QprashnaContract.ProfileEntry.STATE + " TEXT NOT NULL);";
+                QprashnaContract.ProfileEntry.COUNTRY + " TEXT, " +
+                QprashnaContract.ProfileEntry.STATE + " TEXT);";
 
         db.execSQL(CREATE_PROFILE_TABLE);
     }

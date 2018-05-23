@@ -2,6 +2,7 @@ package com.android.qprashna.ui.login;
 
 import android.content.Intent;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -11,6 +12,7 @@ import android.os.Bundle;
 
 import com.android.qprashna.R;
 import com.android.qprashna.ui.feeds.MainActivity;
+import java.util.List;
 
 import static com.android.qprashna.ui.common.ViewUtils.getUserIdFromSharedPreferences;
 
@@ -61,5 +63,16 @@ public class SignInCreateAccountActivity extends AppCompatActivity {
         mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(mainActivityIntent);
         finish();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        for (Fragment fragment: fragments) {
+            if (fragment != null && fragment instanceof SignInOrCreateAccountFragment) {
+                fragment.onActivityResult(requestCode, resultCode, data);
+            }
+        }
     }
 }

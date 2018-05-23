@@ -1,6 +1,8 @@
 package com.android.qprashna.ui.login;
 
 import android.content.ContentValues;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
@@ -26,6 +28,15 @@ import com.android.qprashna.R;
 import com.android.qprashna.api.LoginResponse;
 import com.android.qprashna.data.QprashnaContract;
 import com.android.qprashna.ui.common.TranslucentProgressBar;
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.CredentialRequest;
+import com.google.android.gms.auth.api.credentials.Credentials;
+import com.google.android.gms.auth.api.credentials.CredentialsClient;
+import com.google.android.gms.auth.api.credentials.CredentialsOptions;
+import com.google.android.gms.auth.api.credentials.IdentityProviders;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvableApiException;
 
 import java.io.IOException;
 
@@ -39,6 +50,7 @@ import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Response;
 
+import static android.app.Activity.RESULT_OK;
 import static com.android.qprashna.api.ApiUtils.getApiService;
 import static com.android.qprashna.api.ApiUtils.getCreateAccountRequestBody;
 import static com.android.qprashna.api.ApiUtils.getErrorMessage;
@@ -81,17 +93,41 @@ public class SignInOrCreateAccountFragment extends Fragment {
 
 
     public static final String USER_TYPE = "user_type";
+    private static final int RC_SAVE = 1;
+    private static final int RC_READ = 3;
     private Disposable mDisposable;
     private LoginResponse mLoginResponse;
     public static final String TAG = SignInOrCreateAccountFragment.class.getName();
+    private GoogleApiClient mGoogleApiClient;
+    private boolean mIsResolving;
+    private CredentialsClient mCredentialsClient;
+    private CredentialRequest mCredentialRequest;
+    private boolean areSaved;
+    private Credential mCredential;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_sign_in_create_account, container, false);
-
         ButterKnife.bind(this, rootView);
+
         if (getActivity() != null) {
+
+            CredentialsOptions options = new CredentialsOptions.Builder()
+                    .forceEnableSaveDialog()
+                    .build();
+            mCredentialsClient = Credentials.getClient(getActivity(), options);
+
+            //google smart lock
+            mCredentialRequest = new CredentialRequest.Builder()
+                    .setPasswordLoginSupported(true)
+                    .setAccountTypes(IdentityProviders.GOOGLE, IdentityProviders.TWITTER)
+                    .build();
+
+            if (!isNewUser()) {
+                requestGoogleSmartLockCredentials();
+            }
+
             mViewPager = getActivity().findViewById(R.id.viewPager);
             mProgressBar = TranslucentProgressBar.getInstance();
 
@@ -192,7 +228,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
                     .subscribeWith(new DisposableObserver<Response<LoginResponse>>() {
                         @Override
                         public void onNext(Response<LoginResponse> loginResponse) {
-                            if(loginResponse.headers() != null && loginResponse.headers().get("Set-Cookie") != null) {
+                            if (loginResponse.headers() != null && loginResponse.headers().get("Set-Cookie") != null) {
                                 String jSessionId = loginResponse.headers().get("Set-Cookie").split(";", 2)[0];
                                 storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
                             }
@@ -263,7 +299,7 @@ public class SignInOrCreateAccountFragment extends Fragment {
                         public void onNext(Response<LoginResponse> loginResponse) {
                             mProgressBar.unShowProgress();
                             if (loginResponse != null) {
-                                if(loginResponse.headers() != null && loginResponse.headers().get("Set-Cookie") != null) {
+                                if (loginResponse.headers() != null && loginResponse.headers().get("Set-Cookie") != null) {
                                     String jSessionId = loginResponse.headers().get("Set-Cookie").split(";", 2)[0];
                                     storeJSessionIdInSharedPreferences(getActivity(), jSessionId);
                                 }
@@ -274,6 +310,9 @@ public class SignInOrCreateAccountFragment extends Fragment {
                                     } else if (mLoginResponse.getStatus().equalsIgnoreCase(getString(R.string.account_active_status))) {
                                         saveUserIdInSharedPreferences(getActivity(), mLoginResponse.getId());
                                         saveProfileInfo();
+                                        if(mCredential == null || !mCredential.getId().equalsIgnoreCase(userNameEntry.getText().toString()) || !mCredential.getPassword().equals(passwordEntry.getText().toString())) {
+                                            saveCredentialsInSmartLock(userName, password);
+                                        }
                                         ((SignInCreateAccountActivity) getActivity()).launchMainActivity();
                                     }
                                 } else if (loginResponse.errorBody() != null) {
@@ -312,5 +351,106 @@ public class SignInOrCreateAccountFragment extends Fragment {
         if (mDisposable != null) {
             mDisposable.dispose();
         }
+    }
+
+    private void requestGoogleSmartLockCredentials() {
+        mCredentialsClient.request(mCredentialRequest).addOnCompleteListener(
+                task -> {
+                    if (task.isSuccessful()) {
+                        // See "Handle successful credential requests"
+                        mCredential = (Credential)task.getResult().getCredential();
+                        SignInOrCreateAccountFragment.this.onCredentialRetrieved();
+                        return;
+                    }
+
+                    Exception e = task.getException();
+                    if (e instanceof ResolvableApiException) {
+                        // This is most likely the case where the user has multiple saved
+                        // credentials and needs to pick one. This requires showing UI to
+                        // resolve the read request.
+                        ResolvableApiException rae = (ResolvableApiException) e;
+                        SignInOrCreateAccountFragment.this.resolveResult(rae, RC_READ);
+                    } else if (e instanceof ApiException) {
+                        // The user must create an account or sign in manually.
+                        Log.e(TAG, "Unsuccessful credential request.", e);
+
+                        ApiException ae = (ApiException) e;
+                        int code = ae.getStatusCode();
+                        // ...
+                    }
+                });
+    }
+
+    private void onCredentialRetrieved() {
+        String accountType = mCredential.getAccountType();
+        if (accountType == null) {
+            // Sign the user in with information from the Credential.
+            userNameEntry.setText(mCredential.getId());
+            passwordEntry.setText(mCredential.getPassword());
+        }
+    }
+
+    private void resolveResult(ResolvableApiException rae, int requestCode) {
+        try {
+            rae.startResolutionForResult(getActivity(), requestCode);
+            mIsResolving = true;
+        } catch (IntentSender.SendIntentException e) {
+            Log.e(TAG, "Failed to send resolution.", e);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_READ) {
+            if (resultCode == RESULT_OK) {
+                mCredential = data.getParcelableExtra(Credential.EXTRA_KEY);
+                onCredentialRetrieved();
+            } else {
+                Log.e(TAG, "Credential Read: NOT OK");
+            }
+        }
+        if (requestCode == RC_SAVE) {
+            if (resultCode == RESULT_OK) {
+                Log.d(TAG, "SAVE: OK");
+                Toast.makeText(getActivity(), R.string.credentials_saved, Toast.LENGTH_SHORT).show();
+            } else {
+                Log.e(TAG, "SAVE: Canceled by user");
+            }
+        }
+
+    }
+
+    private void saveCredentialsInSmartLock(String userName, String password) {
+        Credential credential = new Credential.Builder(userName)
+                .setPassword(password)
+                .build();
+
+        mCredentialsClient.save(credential).addOnCompleteListener(
+                task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "SAVE: OK");
+                        if(getActivity()!=null) {
+                            Toast.makeText(SignInOrCreateAccountFragment.this.getActivity(), R.string.credentials_saved, Toast.LENGTH_SHORT).show();
+                        }
+                        return;
+                    }
+
+                    Exception e = task.getException();
+                    if (e instanceof ResolvableApiException) {
+                        // Try to resolve the save request. This will prompt the user if
+                        // the credential is new.
+                        ResolvableApiException rae = (ResolvableApiException) e;
+                        try {
+                            rae.startResolutionForResult(SignInOrCreateAccountFragment.this.getActivity(), RC_SAVE);
+                        } catch (IntentSender.SendIntentException ex) {
+                            // Could not resolve the request
+                            Log.e(TAG, "Failed to send resolution.", e);
+                        }
+                    } else {
+                        // Request has no resolution
+                        Log.e(TAG, "Failed to save", e);
+                    }
+                });
     }
 }

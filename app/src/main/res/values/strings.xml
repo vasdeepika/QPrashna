@@ -79,4 +79,5 @@
     <string name="account_active_status">active</string>
     <string name="adunitId">ca-app-pub-3940256099942544/1033173712</string>
     <string name="question_submit_text">Your question submitted successfully!</string>
+    <string name="credentials_saved">Credentials saved in smart lock</string>
 </resources>
