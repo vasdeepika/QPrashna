@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String JOB_TAG = "QprashnaReminderJobService";
     private FirebaseJobDispatcher mDispatcher;
+    private Cursor mProfileCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -290,27 +291,23 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(@NonNull Loader loader, Object cursor) {
-        Cursor profileCursor = (Cursor) cursor;
+        mProfileCursor = (Cursor) cursor;
 
         mProfileDetails = new ProfileDataObject();
 
-        if (profileCursor != null && profileCursor.moveToFirst()) {
+        if (mProfileCursor != null && mProfileCursor.moveToFirst()) {
 
-            profileCursor.moveToFirst();
+            mProfileCursor.moveToFirst();
 
-            mProfileDetails.setUserId(profileCursor.getInt(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.USERID)));
-            mProfileDetails.setFirstName(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.FIRSTNAME)));
-            mProfileDetails.setLastName(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.LASTNAME)));
-            mProfileDetails.setEmail(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.EMAIL)));
-            mProfileDetails.setDesignation(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.DESIGNATION)));
-            mProfileDetails.setDob(profileCursor.getLong(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.DOB)));
-            mProfileDetails.setCountry(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.COUNTRY)));
-            mProfileDetails.setState(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.STATE)));
-            mProfileDetails.setProfilePicURL(profileCursor.getString(profileCursor.getColumnIndex(QprashnaContract.ProfileEntry.PROFILEPIC)));
-        }
-
-        if (profileCursor != null) {
-            profileCursor.close();
+            mProfileDetails.setUserId(mProfileCursor.getInt(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.USERID)));
+            mProfileDetails.setFirstName(mProfileCursor.getString(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.FIRSTNAME)));
+            mProfileDetails.setLastName(mProfileCursor.getString(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.LASTNAME)));
+            mProfileDetails.setEmail(mProfileCursor.getString(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.EMAIL)));
+            mProfileDetails.setDesignation(mProfileCursor.getString(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.DESIGNATION)));
+            mProfileDetails.setDob(mProfileCursor.getLong(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.DOB)));
+            mProfileDetails.setCountry(mProfileCursor.getString(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.COUNTRY)));
+            mProfileDetails.setState(mProfileCursor.getString(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.STATE)));
+            mProfileDetails.setProfilePicURL(mProfileCursor.getString(mProfileCursor.getColumnIndex(QprashnaContract.ProfileEntry.PROFILEPIC)));
         }
 
         if (mProfileDetails != null) {
@@ -330,12 +327,20 @@ public class MainActivity extends AppCompatActivity
                 .setService(QprashnaJobService.class)
                 .setTag(JOB_TAG)
                 .setRecurring(true)
-                .setTrigger(Trigger.executionWindow(0, 30))
+                .setTrigger(Trigger.executionWindow(1800, 86400))
                 .setLifetime(Lifetime.FOREVER)
                 .setReplaceCurrent(true)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .build();
         mDispatcher.mustSchedule(myJob);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mProfileCursor != null) {
+            mProfileCursor.close();
+        }
     }
 }
