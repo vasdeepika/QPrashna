@@ -57,4 +57,5 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
     implementation 'com.google.android.gms:play-services-ads:11.8.0'
     implementation 'com.google.android.gms:play-services-auth:11.8.0'
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 }

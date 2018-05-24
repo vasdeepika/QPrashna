@@ -80,4 +80,8 @@
     <string name="adunitId">ca-app-pub-3940256099942544/1033173712</string>
     <string name="question_submit_text">Your question submitted successfully!</string>
     <string name="credentials_saved">Credentials saved in smart lock</string>
+    <string name="job_scheduled">qprashna un answered questions reminder job scheduled.</string>
+    <string name="remind_unanswered_questions_channel_name">Unanswered Quesions</string>
+    <string name="unanswered_question_reminder_notification_title">QPrashna</string>
+    <string name="unanswered_question_reminder_notification_body">You have new questions to answer</string>
 </resources>

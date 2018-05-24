@@ -25,6 +25,13 @@ import com.android.qprashna.data.QprashnaContract;
 import com.android.qprashna.ui.ChangePasswordFragment;
 import com.android.qprashna.ui.EditProfileFragment;
 import com.android.qprashna.ui.login.SignInCreateAccountActivity;
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 
 import org.parceler.Parcels;
 
@@ -41,6 +48,9 @@ public class MainActivity extends AppCompatActivity
 
     public static final String QPRASHNA_FRAGMENT = "fragment";
     private int navDrawerSelectedItemId;
+
+    private static final String JOB_TAG = "QprashnaReminderJobService";
+    private FirebaseJobDispatcher mDispatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,14 +74,29 @@ public class MainActivity extends AppCompatActivity
         if (savedInstanceState == null) {
             getSupportLoaderManager().initLoader(1, null, this);
 
-            FeedsFragment feedsFragment = new FeedsFragment();
-            Bundle fragmentBundle = new Bundle();
-            fragmentBundle.putString(FeedsFragment.FEED_TYPE, FragmentTypes.GENERAL.toString());
-            feedsFragment.setArguments(fragmentBundle);
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.qprashna_fragment, feedsFragment, QPRASHNA_FRAGMENT)
-                    .commit();
+            if(getIntent().hasExtra(FeedsFragment.FEED_TYPE)) {
+                if(getIntent().getStringExtra(FeedsFragment.FEED_TYPE).equals(FragmentTypes.QUESTIONS_UNANSWERED.toString())) {
+                    navigationView.getMenu().getItem(2).setChecked(true);
+                    FeedsFragment feedsFragment = new FeedsFragment();
+                    Bundle fragmentBundle = new Bundle();
+                    fragmentBundle.putString(FeedsFragment.FEED_TYPE, FragmentTypes.QUESTIONS_UNANSWERED.toString());
+                    feedsFragment.setArguments(fragmentBundle);
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.qprashna_fragment, feedsFragment, QPRASHNA_FRAGMENT)
+                            .commit();
+                }
+
+            } else {
+                FeedsFragment feedsFragment = new FeedsFragment();
+                Bundle fragmentBundle = new Bundle();
+                fragmentBundle.putString(FeedsFragment.FEED_TYPE, FragmentTypes.GENERAL.toString());
+                feedsFragment.setArguments(fragmentBundle);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .add(R.id.qprashna_fragment, feedsFragment, QPRASHNA_FRAGMENT)
+                        .commit();
+            }
         }
 
         if (savedInstanceState != null) {
@@ -83,6 +108,9 @@ public class MainActivity extends AppCompatActivity
             ((TextView) (headerView.findViewById(R.id.nav_user_name))).setText(String.format("%s %s", mProfileDetails.getFirstName(), mProfileDetails.getLastName()));
             ((TextView) (headerView.findViewById(R.id.nav_user_email))).setText(mProfileDetails.getEmail());
         }
+
+        mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        scheduleJob();
     }
 
     @Override
@@ -297,4 +325,17 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private void scheduleJob() {
+        Job myJob = mDispatcher.newJobBuilder()
+                .setService(QprashnaJobService.class)
+                .setTag(JOB_TAG)
+                .setRecurring(true)
+                .setTrigger(Trigger.executionWindow(0, 30))
+                .setLifetime(Lifetime.FOREVER)
+                .setReplaceCurrent(true)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .build();
+        mDispatcher.mustSchedule(myJob);
+    }
 }
