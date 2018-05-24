@@ -37,6 +37,11 @@ public class QprashnaJobService extends JobService {
     @Override
     public boolean onStartJob(com.firebase.jobdispatcher.JobParameters job) {
 
+        if (getJSessionIdInSharedPreferences(getBaseContext()) == null && getUserIdFromSharedPreferences(getBaseContext()) <=0) {
+            jobFinished(job, false);
+            return false;
+        }
+
         Observable<FeedsResponse> responseObservable = getApiService().getUnAnsweredByMe(getJSessionIdInSharedPreferences(getBaseContext()), getUserIdFromSharedPreferences(getBaseContext()));
 
         mDisposable = responseObservable
