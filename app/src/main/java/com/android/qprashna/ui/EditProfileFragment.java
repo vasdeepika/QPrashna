@@ -84,7 +84,9 @@ public class EditProfileFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
         ButterKnife.bind(this, rootView);
         mProgressBar = TranslucentProgressBar.getInstance();
-        mProfileDataObject = MainActivity.getProfileDetails(getActivity());
+        if (getArguments() != null) {
+            mProfileDataObject = Parcels.unwrap(getArguments().getParcelable(ProfileDataObject.KEY));
+        }
 
         if (mProfileDataObject != null) {
             firstNameLayout.getEditText().setText(mProfileDataObject.getFirstName());
@@ -112,7 +114,7 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void updateProfile(String firstName, String lastName, String gender, String designation, String state, String country, String dob, String email) {
-        if(getActivity()!=null) {
+        if (getActivity() != null) {
             if (isThereInternetConnection(getActivity())) {
                 mProgressBar.showProgress(getActivity());
                 Observable<LoginResponse> responseObservable = getApiService().updateProfile(getJSessionIdInSharedPreferences(getActivity()), updateProfileRequestBody(getUserIdFromSharedPreferences(getActivity()),
